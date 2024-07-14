@@ -150,7 +150,7 @@ Représente une autorisation de retrait.
 
 **NftStatus**
 
-Représente le statut d'un NFT.
+Représente le statut d'un ticket d'entrée.
 
 - Inactive - Le NFT est inactif.
 - Active - Le NFT est actif.
