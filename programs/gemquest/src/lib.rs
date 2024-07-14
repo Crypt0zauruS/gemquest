@@ -337,7 +337,8 @@ pub fn get_nft_by_index(ctx: Context<GetNftByIndex>, index: u64) -> Result<NftIn
     /// # Arguments
     ///
     /// * `ctx` - Le contexte des comptes nécessaires pour la création du ticket.
-    /// * `metadata_uri` - Les métadonnées du ticket.
+    /// * `metadata_uri` - Les métadonnées du ticket. notamment la date d'expiration.
+    /// qui sera calculé par le front-end et intégrée dans les métadonnées.
     /// * `unique_ticket_id` - L'identifiant unique du ticket.
     pub fn mint_park_ticket(ctx: Context<MintParkTicket>, metadata_uri: String, unique_ticket_id: u64) -> Result<()> {
         let quest = &mut ctx.accounts.quest;

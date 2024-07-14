@@ -264,11 +264,14 @@ json_data = {
         }
     },
 
+   // Contrairement aux autre, la metadata du ticket est variable concernant la date d'expiration du ticket et sera calculée et transmise par le front-end lors de l'achat.
+   // Ce json n'est donc pas sur IPFS mais est généré par le front-end lors de l'achat.
+
     "Ticket.json" : {
         "name": "Park Entrance Ticket",
-        "symbol": "PET",
+        "symbol": "GQPET",
         "description": "This NFT serves as an entrance ticket to the park. Valid for 48 hours after activation.",
-        "image": "ipfs://QmTnF91gN7oe5kZYv7kA1Tt1TuWvj6Zm9aWdu1MZHgZEnM/ticket.png",
+        "image": "ipfs://QmdKCs5KQBZG2iU6SSLqSjpy98FS1Ca8aTciEKwnyo87QY",
         "attributes": [
             {
             "trait_type": "Type",
@@ -276,7 +279,7 @@ json_data = {
             },
             {
             "trait_type": "Validity",
-            "value": "One-time use"
+            "value": "until expiration-date-here"
             },
             {
             "trait_type": "Issued By",
