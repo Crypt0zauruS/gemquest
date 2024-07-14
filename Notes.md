@@ -1,6 +1,6 @@
 ** Metadata des Gems et NFTS **
 
-Chaque gemme et nft doit être un fichier json invividuel, uploadé sur NFT Storage, en notant son adresse IPFS.
+Chaque gemme et nft est un fichier json invividuel, uploadé sur IPFS, en notant son adresse IPFS.
 
 ** Metadata des Gems et NFTs en json **
 
