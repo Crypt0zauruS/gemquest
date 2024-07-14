@@ -1,12 +1,14 @@
-** Metadata des Gems et NFTS à uploader sur NFT Storage **
+** Metadata des Gems et NFTS **
 
 Chaque gemme et nft doit être un fichier json invividuel, uploadé sur NFT Storage, en notant son adresse IPFS.
 
 ** Metadata des Gems et NFTs en json **
 
+- Gems
+
 ```json
 
-json_data = {
+
     "gem1.json": {
         "name": "Gem",
         "symbol": "GQ",
@@ -26,6 +28,7 @@ json_data = {
             ]
         }
     },
+
     "gem5.json": {
         "name": "Gem",
         "symbol": "GQ",
@@ -45,6 +48,7 @@ json_data = {
             ]
         }
     },
+
     "gem10.json": {
         "name": "Gem",
         "symbol": "GQ",
@@ -64,6 +68,7 @@ json_data = {
             ]
         }
     },
+
     "gem20.json": {
         "name": "Gem",
         "symbol": "GQ",
@@ -82,7 +87,14 @@ json_data = {
                 }
             ]
         }
-    },
+    }
+
+```
+
+- Rewards NFTs
+
+```json
+
     "GQSKL.json": {
         "name": "Skip the Line",
         "symbol": "GQSKL",
@@ -296,6 +308,6 @@ json_data = {
         }
     }
 
-}
+
 
 ```
