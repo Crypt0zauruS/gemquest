@@ -9,16 +9,29 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/layout": "^2.3.1",
+    "@chakra-ui/next-js": "^2.2.0",
+    "@chakra-ui/react": "^2.8.2",
+    "@chakra-ui/spinner": "^2.1.0",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@solana/web3.js": "^1.90.0",
+    "@solflare-wallet/sdk": "^1.4.2",
+    "@web3auth/base": "^8.8.0",
+    "@web3auth/default-solana-adapter": "^8.8.0",
+    "@web3auth/modal": "^8.10.2",
+    "@web3auth/solana-provider": "^8.8.0",
+    "framer-motion": "^11.3.2",
+    "next": "14.2.5",
     "react": "^18",
-    "react-dom": "^18",
-    "next": "14.2.5"
+    "react-dom": "^18"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "postcss": "^8",
-    "tailwindcss": "^3.4.1"
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
   }
 }
