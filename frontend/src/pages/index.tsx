@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import Footer from "@/components/Footer";
 import Loader from "../components/Loader";
 import Header from "../components/Header";
-import RPC from "../components/solanaRPC";
+import RPC from "../services/solanaRPC";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 interface LoginProps {
