@@ -1,4 +1,3 @@
-// index.tsx
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Footer from "@/components/Footer";
@@ -6,6 +5,11 @@ import Loader from "../components/Loader";
 import Header from "../components/Header";
 import RPC from "../services/solanaRPC";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import Camera from "../components/Camera";
+import { sciFiThemes } from "../utils";
+import { ToastContainer, toast } from "react-toastify";
+import { useTheme } from "../lib/ThemeContext";
+import SciFiSelect from "../components/SciFiSelect.tsx";
 
 interface LoginProps {
   login: () => Promise<void>;
@@ -23,6 +27,8 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
   const [address, setAddress] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { theme, setTheme, difficulty, setDifficulty } = useTheme();
+  const [showScanner, setShowScanner] = useState(false);
 
   useEffect(() => {
     if (provider && loggedIn) {
@@ -57,10 +63,40 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setShowScanner(false);
   };
+
+  const handleScanSuccess = (data: string) => {
+    if (sciFiThemes.includes(data)) {
+      router.push({
+        pathname: "/welcome",
+      });
+    } else {
+      setShowScanner(false);
+      setTheme(undefined);
+      setDifficulty("easy");
+      toast.error("Invalid QR Code", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (theme) {
+      handleScanSuccess(theme);
+    }
+  }, [theme]);
 
   return (
     <div className="signUpLoginBox">
+      <ToastContainer />
       <Header />
       <main>
         <div className="slContainer">
@@ -145,29 +181,38 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
                     Welcome to the GemQuest Quiz ! <br />
                     <br />
                     There are 3 levels, each level has 3 questions. <br />
-                    The more you answer correctly, the more you win gems !{" "}
+                    The more you answer correctly, and the more it's diffucult,
+                    the more you win gems ! <br />
                     <br />
+                    <span style={{ color: "orangered" }}>Warning !</span>{" "}
+                    Refreshing the page, going back or Logout during the quiz
+                    will reset your progression ! <br />
                     <br />
-                    Warning ! Changing account, network, refreshing, back to
-                    login page or Logout during the quiz will reset your
-                    progression ! <br />
-                    <br />
-                    GOOD LUCK !
+                    Choose your level:
                   </p>
                 </div>
+                <SciFiSelect
+                  options={["easy", "intermediate", "expert"]}
+                  value={difficulty}
+                  onChange={(value: string) => setDifficulty(value)}
+                />
                 <hr />
+
                 {!loading ? (
                   <>
-                    <button
-                      className="btnSubmit"
-                      type="button"
-                      onClick={() => {
-                        router.push("/welcome");
-                        setLoading(true);
-                      }}
-                    >
-                      Engage !
-                    </button>
+                    {!showScanner ? (
+                      <button
+                        className="btnSubmit"
+                        type="button"
+                        onClick={() => setShowScanner(true)}
+                      >
+                        Scan
+                      </button>
+                    ) : (
+                      <div className="camera-container">
+                        <Camera />
+                      </div>
+                    )}
                     <button
                       className="btnSubmit"
                       type="button"

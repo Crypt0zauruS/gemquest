@@ -1,8 +1,9 @@
-import { forwardRef, memo, useState } from "react";
+import { forwardRef, memo, useState, useEffect } from "react";
 import { GiTrophyCup } from "react-icons/gi";
 import { SiStartrek } from "react-icons/si";
 import Loader from "../Loader";
 import { ToastContainer } from "react-toastify";
+import { useTheme } from "../../lib/ThemeContext";
 
 const QuizzOver = forwardRef((props, ref) => {
   const {
@@ -17,6 +18,8 @@ const QuizzOver = forwardRef((props, ref) => {
   } = props;
 
   const [loading, setLoading] = useState(false);
+  const { difficulty } = useTheme();
+  const [gemsEarned, setGemsEarned] = useState(0);
 
   const getFinalMessage = (score) => {
     if (score === 0) {
@@ -32,15 +35,49 @@ const QuizzOver = forwardRef((props, ref) => {
     }
   };
 
+  const calculateGemsEarned = (correctAnswers) => {
+    const baseGemsPerCorrectAnswer = {
+      easy: 1,
+      intermediate: 2,
+      expert: 3,
+    };
+    const difficultyMultiplier = {
+      easy: 1,
+      intermediate: 1.1,
+      expert: 1.2,
+    };
+
+    const baseGems = correctAnswers * baseGemsPerCorrectAnswer[difficulty];
+    const totalGems = baseGems * difficultyMultiplier[difficulty];
+
+    return Math.min(Math.round(totalGems), 30);
+  };
+
+  useEffect(() => {
+    const earned = calculateGemsEarned(score);
+    setGemsEarned(earned);
+  }, [difficulty, score]);
+
   const decision = isLastLevel ? (
     <>
       <div className="stepsBtnContainer">
         <p className="successMsg">
-          <GiTrophyCup size="50px" /> {getFinalMessage(score)}{" "}
+          <GiTrophyCup size="40px" /> {getFinalMessage(score)}{" "}
         </p>
-        <button className="btnResult gameOver" disabled={loading}>
-          Mint Your Gems !
-        </button>
+        {score > 0 && (
+          <div>
+            {" "}
+            <button
+              className="btnResult gameOver"
+              disabled={loading || score === 0}
+            >
+              💎 Mint Your Gems ! 💎
+            </button>
+            <p className="progressPercent" style={{ marginTop: "10px" }}>
+              Gems earned: {gemsEarned} 💍
+            </p>
+          </div>
+        )}
       </div>
       <div className="percentage">
         <div className="progressPercent">

@@ -1,14 +1,35 @@
 import { useState, useEffect, useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
-import { QuizzStarTrek } from "../QuizzStarTrek";
 import Levels from "../Levels";
 import ProgressBar from "../ProgressBar";
 import QuizzOver from "../QuizzOver";
 import { GiCyborgFace } from "react-icons/gi";
 import { SiStartrek } from "react-icons/si";
 import Header from "../Header";
+import { useRouter } from "next/navigation";
+import { useTheme } from "../../lib/ThemeContext";
 
-const Quizz = () => {
+const Quizz = ({ quizData }) => {
+  const router = useRouter();
+
+  if (!quizData?.quizz || quizData.quizz.length === 0) {
+    toast.error(
+      "No quiz available, please check back later or contact support",
+      {
+        theme: "dark",
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        progress: undefined,
+      }
+    );
+    router.push("/");
+    return null;
+  }
+
   const initialState = {
     levelNames: ["ensign", "captain", "admiral"],
     quizzLevel: 0,
@@ -29,6 +50,7 @@ const Quizz = () => {
 
   const [state, setState] = useState(initialState);
   const storedDataRef = useRef();
+  const { theme, difficulty } = useTheme();
 
   useEffect(() => {
     if (typeof window !== "undefined" && !state.pause && !state.quizzEnd) {
@@ -37,8 +59,8 @@ const Quizz = () => {
     }
   }, [state.quizzLevel, state.pause, state.quizzEnd]);
 
-  const loadQuestions = async (level) => {
-    const fetchedArrayQuizz = QuizzStarTrek[0].quizz[level];
+  const loadQuestions = (level) => {
+    const fetchedArrayQuizz = quizData.quizz[level];
     if (fetchedArrayQuizz?.length >= state.maxQuestions) {
       storedDataRef.current = fetchedArrayQuizz;
       const newArray = fetchedArrayQuizz.map(
@@ -251,7 +273,7 @@ const Quizz = () => {
             padding: "10px",
           }}
         >
-          Your journey to the stars
+          Challenge : {theme}, {difficulty}
         </h1>
 
         <Levels levelNames={state.levelNames} quizzLevel={state.quizzLevel} />

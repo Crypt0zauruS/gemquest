@@ -1,6 +1,5 @@
 import { useEffect, useState, memo } from "react";
 import Stepper from "react-stepper-horizontal";
-//import sphere from "../../images/sphere.png";
 
 const Levels = ({ levelNames = [], quizzLevel = 0 }) => {
   const [levels, setLevels] = useState([]);

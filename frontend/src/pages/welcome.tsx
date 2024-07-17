@@ -1,15 +1,116 @@
-import { useRouter } from "next/router";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import Logout from "../components/Logout";
 import Quizz from "../components/Quizz";
+import { useTheme } from "../lib/ThemeContext";
+import { ToastContainer, toast } from "react-toastify";
+import { useRouter } from "next/router";
+import Loader from "../components/Loader";
 
-const Welcome = ({ logout }: { logout: any }) => {
+const Welcome = ({ logout }: { logout: () => void }) => {
+  const { theme, setTheme, difficulty, setDifficulty } = useTheme();
+  const [quizData, setQuizData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [hydrated, setHydrated] = useState(false);
   const router = useRouter();
+
+  const generateQuiz = useCallback(async () => {
+    try {
+      const response = await fetch("/api/generate-quiz", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ theme, difficulty }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setQuizData(data.quiz);
+        console.log("quizData after setting:");
+      } else {
+        console.error("Failed to generate quiz:");
+      }
+    } catch (error) {
+      console.error("Error generating quiz:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (theme) {
+        await generateQuiz();
+        setLoading(false);
+      } else {
+        toast.error(
+          "No quiz available, please check back later or contact support",
+          {
+            theme: "dark",
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+          }
+        );
+        router.push("/");
+      }
+    };
+    fetchData();
+  }, [theme, generateQuiz]);
+
+  // Ensure the component is hydrated before rendering
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  const memoizedQuizData = useMemo(() => quizData, [quizData]);
+
+  useEffect(() => {
+    console.log("quizData updated:");
+  }, [memoizedQuizData]);
+
+  // Handle back button behavior
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      event.preventDefault();
+      console.log("Back button pressed");
+      setTheme(undefined);
+      setDifficulty("easy");
+      setQuizData(null);
+      logout();
+      router.push("/"); // Use replace instead of push to avoid adding to history stack
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [logout, router]);
+
+  if (!hydrated) {
+    return null;
+  }
 
   return (
     <div className="quiz-bg">
+      <ToastContainer />
       <div className="container">
         <Logout logout={logout} />
-        <Quizz />
+        {loading ? (
+          <Loader
+            loadingMsg={"Generating quiz..."}
+            styling={{
+              color: "skyblue",
+              fontSize: "2rem",
+              textAlign: "center",
+            }}
+          />
+        ) : (
+          <Quizz quizData={memoizedQuizData} />
+        )}
       </div>
     </div>
   );
