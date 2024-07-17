@@ -33,7 +33,7 @@ export default async function handler(
     const prompt = generateQuizPrompt(theme, difficulty);
 
     const aiResponse = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
