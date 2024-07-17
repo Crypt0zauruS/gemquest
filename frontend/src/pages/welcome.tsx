@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 import Loader from "../components/Loader";
 
 const Welcome = ({ logout }: { logout: () => void }) => {
-  const { theme, setTheme, difficulty, setDifficulty } = useTheme();
+  const { theme, setTheme, difficulty, setDifficulty, isSignedIn } = useTheme();
   const [quizData, setQuizData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [hydrated, setHydrated] = useState(false);
@@ -36,6 +36,7 @@ const Welcome = ({ logout }: { logout: () => void }) => {
   }, []);
 
   useEffect(() => {
+    if (!isSignedIn) return;
     const fetchData = async () => {
       if (theme) {
         await generateQuiz();
@@ -63,6 +64,10 @@ const Welcome = ({ logout }: { logout: () => void }) => {
   // Ensure the component is hydrated before rendering
   useEffect(() => {
     setHydrated(true);
+    if (!isSignedIn) {
+      logout();
+      router.push("/");
+    }
   }, []);
 
   const memoizedQuizData = useMemo(() => quizData, [quizData]);
@@ -80,7 +85,7 @@ const Welcome = ({ logout }: { logout: () => void }) => {
       setDifficulty("easy");
       setQuizData(null);
       logout();
-      router.push("/"); // Use replace instead of push to avoid adding to history stack
+      router.push("/");
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -97,21 +102,23 @@ const Welcome = ({ logout }: { logout: () => void }) => {
   return (
     <div className="quiz-bg">
       <ToastContainer />
-      <div className="container">
-        <Logout logout={logout} />
-        {loading ? (
-          <Loader
-            loadingMsg={"Generating quiz..."}
-            styling={{
-              color: "skyblue",
-              fontSize: "2rem",
-              textAlign: "center",
-            }}
-          />
-        ) : (
-          <Quizz quizData={memoizedQuizData} />
-        )}
-      </div>
+      {isSignedIn && (
+        <div className="container">
+          <Logout logout={logout} />
+          {loading ? (
+            <Loader
+              loadingMsg={"Generating quiz..."}
+              styling={{
+                color: "skyblue",
+                fontSize: "2rem",
+                textAlign: "center",
+              }}
+            />
+          ) : (
+            <Quizz quizData={memoizedQuizData} />
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -87,3 +87,14 @@ Generate an ${difficulty} level quiz on the theme "${theme}" with the following 
     ]
   }
 }`;
+
+export const messageToSign = `
+By signing this message, you acknowledge and agree to the following:
+You can earn Gems by participating in quizzes while waiting in lines at the amusement park. These Gems can be exchanged for reward NFTs.
+Reward NFTs offer perks like Skip the Line passes, VIP access, free drinks, snacks, and exclusive merchandise.
+You can purchase entry tickets and other items on the GemQuest Marketplace.
+Legal Disclaimer:
+The developers of GemQuest are not responsible for any losses incurred during the use of the platform.
+All transactions are final and non-refundable.
+Ensure the security of your wallet and private keys; the developers are not liable for any unauthorized access.
+By signing below, you accept and understand these terms.`;

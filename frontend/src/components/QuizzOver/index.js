@@ -18,7 +18,7 @@ const QuizzOver = forwardRef((props, ref) => {
   } = props;
 
   const [loading, setLoading] = useState(false);
-  const { difficulty } = useTheme();
+  const { difficulty, isSignedIn } = useTheme();
   const [gemsEarned, setGemsEarned] = useState(0);
 
   const getFinalMessage = (score) => {
@@ -53,6 +53,18 @@ const QuizzOver = forwardRef((props, ref) => {
     return Math.min(Math.round(totalGems), 30);
   };
 
+  const handleMintGems = async () => {
+    setLoading(true);
+    try {
+      // Mint gems
+      console.log(`Minting ${gemsEarned} gems...`);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const earned = calculateGemsEarned(score);
     setGemsEarned(earned);
@@ -69,7 +81,8 @@ const QuizzOver = forwardRef((props, ref) => {
             {" "}
             <button
               className="btnResult gameOver"
-              disabled={loading || score === 0}
+              disabled={loading || score === 0 || !isSignedIn}
+              onClick={handleMintGems}
             >
               💎 Mint Your Gems ! 💎
             </button>

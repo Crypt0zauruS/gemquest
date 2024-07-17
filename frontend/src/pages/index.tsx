@@ -6,7 +6,7 @@ import Header from "../components/Header";
 import RPC from "../services/solanaRPC";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import Camera from "../components/Camera";
-import { sciFiThemes } from "../utils";
+import { sciFiThemes, messageToSign } from "../utils";
 import { ToastContainer, toast } from "react-toastify";
 import { useTheme } from "../lib/ThemeContext";
 import SciFiSelect from "../components/SciFiSelect.tsx";
@@ -27,27 +27,53 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
   const [address, setAddress] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { theme, setTheme, difficulty, setDifficulty } = useTheme();
+  const {
+    theme,
+    setTheme,
+    difficulty,
+    setDifficulty,
+    setIsSignedIn,
+    isSignedIn,
+  } = useTheme();
   const [showScanner, setShowScanner] = useState(false);
 
   useEffect(() => {
     if (provider && loggedIn) {
       setLoader(true);
       try {
-        const fetchBalance = async () => {
+        const fetchInfos = async () => {
           const rpc = new RPC(provider);
-          const balance = await rpc.getBalance();
-          setBalance(parseFloat(balance) / LAMPORTS_PER_SOL);
           const accounts = await rpc.getAccounts();
           const address = accounts[0];
+          // Handle message signing
+          const signature = await rpc.signMessage(messageToSign);
+          if (!signature) {
+            toast.error("You must sign to enjoy GemQuest", {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            });
+            logout();
+            return;
+          }
+          setIsSignedIn(true);
+          const balance = await rpc.getBalance();
+          setBalance(parseFloat(balance) / LAMPORTS_PER_SOL);
           setAddress(address);
           setStatus("You have been assimilated");
-          setLoader(false);
         };
-        fetchBalance();
+        fetchInfos();
       } catch (error) {
         console.error(error);
         setError("An error occurred");
+        setStatus("Resistance is Futile");
+        setBalance(null);
+        setAddress(null);
+      } finally {
         setLoader(false);
       }
     } else {
@@ -117,7 +143,7 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
 
               {loggedIn && (
                 <div>
-                  <h2>Account:</h2>
+                  {address && <h2>Account:</h2>}
                   <form className="inputBox">
                     {balance && address && (
                       <p>
@@ -138,20 +164,26 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
                     <hr />
                     {loggedIn && (
                       <>
-                        <button
-                          className="btnSubmit"
-                          type="button"
-                          onClick={openModal}
-                        >
-                          Start a quiz !
-                        </button>
-                        <button
-                          className="btnSubmit"
-                          type="button"
-                          // onClick={()=>router.push("/marketplace")}
-                        >
-                          Reach your Marketplace !
-                        </button>
+                        {address && (
+                          <div>
+                            <button
+                              className="btnSubmit"
+                              type="button"
+                              onClick={openModal}
+                              disabled={loading || !address}
+                            >
+                              Start a quiz !
+                            </button>
+                            <button
+                              className="btnSubmit"
+                              type="button"
+                              disabled={loading || !address}
+                              // onClick={()=>router.push("/marketplace")}
+                            >
+                              Reach your Marketplace !
+                            </button>
+                          </div>
+                        )}
                         <button
                           className="btnSubmit"
                           type="button"
@@ -181,14 +213,14 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
                     Welcome to the GemQuest Quiz ! <br />
                     <br />
                     There are 3 levels, each level has 3 questions. <br />
-                    The more you answer correctly, and the more it's diffucult,
+                    The more you answer correctly, and the more it's difficult,
                     the more you win gems ! <br />
                     <br />
                     <span style={{ color: "orangered" }}>Warning !</span>{" "}
                     Refreshing the page, going back or Logout during the quiz
                     will reset your progression ! <br />
                     <br />
-                    Choose your level:
+                    Choose your level, then scan the QR Code:
                   </p>
                 </div>
                 <SciFiSelect
@@ -205,6 +237,7 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
                         className="btnSubmit"
                         type="button"
                         onClick={() => setShowScanner(true)}
+                        disabled={loading || !isSignedIn}
                       >
                         Scan
                       </button>
