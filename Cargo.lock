@@ -984,6 +984,7 @@ dependencies = [
  "anchor-lang",
  "anchor-spl",
  "rand 0.8.5",
+ "solana-program",
 ]
 
 [[package]]
