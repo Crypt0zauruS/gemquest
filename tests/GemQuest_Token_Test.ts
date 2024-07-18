@@ -44,7 +44,8 @@ describe('SPL Token Minter', () => {
 
         // Derive the associated token address account for the mint and payer.
         // const associatedTokenAccountAddress = getAssociatedTokenAddressSync(mintKeypair.publicKey, user1.publicKey);
-        const associatedTokenAccountAddress = getAssociatedTokenAddressSync(mintPubkey, user1.publicKey);
+        const associatedTokenAccountAddress = getAssociatedTokenAddressSync(mintKeypair.publicKey, user1.publicKey);
+        // const associatedTokenAccountAddress = getAssociatedTokenAddressSync(mintPubkey, user1.publicKey);
 
         // Amount of tokens to mint.
         const amount = new anchor.BN(100);
@@ -55,8 +56,8 @@ describe('SPL Token Minter', () => {
             .accounts({
                 mintAuthority: payer.publicKey,
                 recipient: user1.publicKey,
-                // mintAccount: mintKeypair.publicKey,
-                mintAccount: mintPubkey,
+                mintAccount: mintKeypair.publicKey,
+                // mintAccount: mintPubkey,
                 associatedTokenAccount: associatedTokenAccountAddress,
             })
             .rpc();
