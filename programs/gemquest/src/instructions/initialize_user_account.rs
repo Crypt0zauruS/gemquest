@@ -36,7 +36,7 @@ pub struct UserAccount {
 
     // User wallet pub key
     pub authority: Pubkey,
-    pub token_account: Pubkey,
+    // pub assciated_gems_token_account: Pubkey,
 }
 
 // #[account]

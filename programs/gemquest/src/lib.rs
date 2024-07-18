@@ -9,7 +9,7 @@ use {
         token::{Mint, Token},
     },
 };
-declare_id!("BHZzhjwDAUDqdBJ8H8R38CczEVCLV4ZPhZ2oJMYyAMKu");
+declare_id!("E5n2KkgFYwrBKhpiKG5xeVsLPUxwFQk4PMzUDrwYWnEg");
 
 pub mod instructions;
 
@@ -34,5 +34,14 @@ pub mod gemquest {
 
     pub fn mint_tokens_to_user(ctx: Context<MintTokensToUser>, amount: u64) -> Result<()> {
         instructions::mint_tokens_to_user::mint_tokens_to_user(ctx, amount)
+    }
+
+    pub fn create_nft(
+        ctx: Context<CreateNFT>,
+        nft_name: String,
+        nft_symbol: String,
+        nft_uri: String,
+    ) -> Result<()> {
+        instructions::create_nft::create_nft(ctx, nft_name, nft_symbol, nft_uri)
     }
 }
