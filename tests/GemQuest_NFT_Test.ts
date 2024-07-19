@@ -24,8 +24,19 @@ describe('NFT Minter', () => {
         // Generate a keypair to use as the address of our mint account
         const mintKeypair = new Keypair();
 
+         // Generate a keypair for the token mint (used for burning tokens)
+         const tokenMintKeypair = new Keypair();
+
+         
+
         // Derive the associated token address account for the mint and payer.
         const associatedTokenAccountAddress = getAssociatedTokenAddressSync(mintKeypair.publicKey, payer.publicKey);
+
+        // Derive the associated token address for the token mint and payer (user's token account). (used for burning tokens)
+        const userTokenAccountAddress = getAssociatedTokenAddressSync(tokenMintKeypair.publicKey, payer.publicKey);
+
+        // Assume `burn_amount` to be defined, or set a default (used for burning tokens)
+        const burnAmount = 10; 
 
         const transactionSignature = await program.methods
             .createNft(metadata.name, metadata.symbol, metadata.uri)
@@ -33,13 +44,17 @@ describe('NFT Minter', () => {
                 payer: payer.publicKey,
                 mintAccount: mintKeypair.publicKey,
                 associatedTokenAccount: associatedTokenAccountAddress,
+                 tokenMint: tokenMintKeypair.publicKey, // Account for the token mint
+                userTokenAccount: userTokenAccountAddress, // Account from which tokens will be burned
+                tokenProgram: TOKEN_PROGRAM_ID // Include the Token Program ID
             })
-            .signers([mintKeypair])
+            .signers([mintKeypair, tokenMintKeypair]) // Include token mint keypair as a signer (Not sure)
             .rpc({ skipPreflight: true });
 
         console.log('Success!');
         console.log(`   Mint Address: ${mintKeypair.publicKey}`);
         console.log(`   Holder: ${associatedTokenAccountAddress}`);
         console.log(`   Transaction Signature: ${transactionSignature}`);
+        console.log(`   Burned Tokens from: ${userTokenAccountAddress}`); // TO BURN
     });
 });
