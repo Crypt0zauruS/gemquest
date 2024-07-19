@@ -7,7 +7,7 @@ use {
             mpl_token_metadata::types::DataV2, CreateMasterEditionV3, CreateMetadataAccountsV3,
             Metadata,
         },
-        token::{mint_to, Mint, MintTo, Token, TokenAccount},
+        token::{mint_to, Burn, Mint, MintTo, Token, TokenAccount},
     },
 };
 
