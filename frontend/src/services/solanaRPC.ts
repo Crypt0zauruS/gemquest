@@ -16,7 +16,7 @@ import { CustomChainConfig, IProvider } from "@web3auth/base";
 import { SolanaWallet } from "@web3auth/solana-provider";
 import idl from "../lib/idl.json";
 import { AnchorProvider } from "@coral-xyz/anchor";
-import { Program, BN } from "@project-serum/anchor";
+import { Program, BN, Wallet } from "@project-serum/anchor";
 import {
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -363,15 +363,11 @@ export default class SolanaRpc {
 
 
 
-      const ENV_DEPLOYER_PRIVATE_KEY = "5goreipUSyZ3eV4Qxi4b4kdfuZo18mKczha6cmTV2FdFshRkLNhwDsvN6H9WTNr7VsW6V8KzyihANZ7BHv52RgpV";
+      const ENV_DEPLOYER_PRIVATE_KEY = "";
       const walletKP = Keypair.fromSecretKey(new Uint8Array(bs58.decode(ENV_DEPLOYER_PRIVATE_KEY)));
 
       console.log("signer:", walletKP.publicKey.toBase58());
       console.log("user:", accounts[0]);
-
-      // const wallet = new anchor.Wallet(walletKP);
-      // const programm = new anchor.Program(idl as any, this.provider);
-
 
       const wallet = {
         signTransaction: async (tx: Transaction) => {
@@ -380,6 +376,14 @@ export default class SolanaRpc {
         },
         publicKey: walletKP,
       };
+      // const provider = new anchor.AnchorProvider(conn, wallet, {
+      //   commitment: "confirmed",
+      // });
+      // anchor.setProvider(provider);
+
+      const wa = new Wallet(walletKP);
+      // const wallett = new anchor.Wallet(walletKP);
+      // const programm = new anchor.Program(idl as any, this.provider);
 
       const provider = new AnchorProvider(conn, wallet as any, {
         preflightCommitment: "finalized",
