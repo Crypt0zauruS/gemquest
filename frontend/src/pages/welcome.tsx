@@ -6,7 +6,13 @@ import { ToastContainer, toast } from "react-toastify";
 import { useRouter } from "next/router";
 import Loader from "../components/Loader";
 
-const Welcome = ({ logout }: { logout: () => void }) => {
+const Welcome = ({
+  logout,
+  provider,
+}: {
+  logout: () => void;
+  provider: any;
+}) => {
   const { theme, setTheme, difficulty, setDifficulty, isSignedIn } = useTheme();
   const [quizData, setQuizData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -115,7 +121,7 @@ const Welcome = ({ logout }: { logout: () => void }) => {
               }}
             />
           ) : (
-            <Quizz quizData={memoizedQuizData} />
+            <Quizz quizData={memoizedQuizData} provider={provider} />
           )}
         </div>
       )}

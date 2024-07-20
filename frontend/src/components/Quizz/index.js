@@ -9,7 +9,7 @@ import Header from "../Header";
 import { useRouter } from "next/navigation";
 import { useTheme } from "../../lib/ThemeContext";
 
-const Quizz = ({ quizData }) => {
+const Quizz = ({ quizData, provider }) => {
   const router = useRouter();
 
   if (!quizData?.quizz || quizData.quizz.length === 0) {
@@ -241,7 +241,8 @@ const Quizz = ({ quizData }) => {
         percent={state.percent}
         loadLevelQuestions={loadLevelQuestions}
         askedQuestions={state.askedQuestions}
-        isLastLevel={true} // Passez cette prop pour indiquer que c'est le dernier niveau
+        isLastLevel={true}
+        provider={provider}
       />
     </>
   ) : state.pause ? (

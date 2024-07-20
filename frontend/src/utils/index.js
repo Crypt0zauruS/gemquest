@@ -20,7 +20,7 @@ export const sciFiThemes = [
 ];
 
 export const generateQuizPrompt = (theme, difficulty) => `
-Generate an ${difficulty} level quiz on the theme "${theme}" with the following structure:
+Generate an ${difficulty} level quiz on the theme "${theme}" with the following structure. Make sure that the expert level questions are extremely difficult and challenging, requiring deep knowledge of the subject:
 {
   provider: "OpenAI",
   topic: "${theme} Quiz with an ${difficulty} difficulty powered by OpenAI",
@@ -30,19 +30,19 @@ Generate an ${difficulty} level quiz on the theme "${theme}" with the following 
         id: 0,
         question: "Question 1?",
         options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-        answer: "Option 1"
+        answer: "Randomly select one of the options"
       },
       {
         id: 1,
         question: "Question 2?",
         options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-        answer: "Option 2"
+        answer: "Randomly select one of the options"
       },
       {
         id: 2,
         question: "Question 3?",
         options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-        answer: "Option 3"
+        answer: "Randomly select one of the options"
       }
     ],
     captain: [
@@ -50,19 +50,19 @@ Generate an ${difficulty} level quiz on the theme "${theme}" with the following 
         id: 0,
         question: "Question 1?",
         options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-        answer: "Option 1"
+        answer: "Randomly select one of the options"
       },
       {
         id: 1,
         question: "Question 2?",
         options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-        answer: "Option 2"
+        answer: "Randomly select one of the options"
       },
       {
         id: 2,
         question: "Question 3?",
         options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-        answer: "Option 3"
+        answer: "Randomly select one of the options"
       }
     ],
     admiral: [
@@ -70,19 +70,19 @@ Generate an ${difficulty} level quiz on the theme "${theme}" with the following 
         id: 0,
         question: "Question 1?",
         options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-        answer: "Option 1"
+        answer: "Randomly select one of the options"
       },
       {
         id: 1,
         question: "Question 2?",
         options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-        answer: "Option 2"
+        answer: "Randomly select one of the options"
       },
       {
         id: 2,
         question: "Question 3?",
         options: ["Option 1", "Option 2", "Option 3", "Option 4"],
-        answer: "Option 3"
+        answer: "Randomly select one of the options"
       }
     ]
   }

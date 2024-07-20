@@ -4,6 +4,7 @@ import { SiStartrek } from "react-icons/si";
 import Loader from "../Loader";
 import { ToastContainer } from "react-toastify";
 import { useTheme } from "../../lib/ThemeContext";
+import RPC from "../../services/solanaRPC";
 
 const QuizzOver = forwardRef((props, ref) => {
   const {
@@ -15,6 +16,7 @@ const QuizzOver = forwardRef((props, ref) => {
     loadLevelQuestions,
     askedQuestions,
     isLastLevel,
+    provider,
   } = props;
 
   const [loading, setLoading] = useState(false);
@@ -56,7 +58,13 @@ const QuizzOver = forwardRef((props, ref) => {
   const handleMintGems = async () => {
     setLoading(true);
     try {
-      // Mint gems
+      const rpc = new RPC(provider);
+      const tx = await rpc.mintGems(gemsEarned);
+      if (tx) {
+        console.log("Transaction sent: ", tx);
+      } else {
+        console.error("Transaction failed");
+      }
       console.log(`Minting ${gemsEarned} gems...`);
     } catch (error) {
       console.error(error);

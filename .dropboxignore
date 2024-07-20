@@ -1,0 +1,12 @@
+# ----
+# Automatically Generated .dropboxignore file at Ven 19 jul 2024 17:25:14 EDT
+# ----
+.anchor
+.DS_Store
+target
+**/*.rs.bk
+node_modules
+test-ledger
+.yarn
+.env
+# ----
