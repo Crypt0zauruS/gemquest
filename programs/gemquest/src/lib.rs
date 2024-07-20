@@ -9,7 +9,8 @@ use {
         token::{Mint, Token},
     },
 };
-declare_id!("E5n2KkgFYwrBKhpiKG5xeVsLPUxwFQk4PMzUDrwYWnEg");
+// declare_id!("HAsE96RGMoeLahbUh8iQ7XF6NmGZyk5bbtoEkG4zE1F1");
+declare_id!("9w1KrVJaq6G9ogtLCsiPjKSAC5Ag3DZsbSXkXgdYmsN3");
 
 pub mod instructions;
 
@@ -18,6 +19,10 @@ use instructions::*;
 #[program]
 pub mod gemquest {
     use super::*;
+
+    pub fn initialize_program(ctx: Context<InitializeProgram>) -> Result<()> {
+        instructions::initialize_program::initialize_program(ctx)
+    }
 
     pub fn initialize_user_account(ctx: Context<InitializeUserAccount>) -> Result<()> {
         instructions::initialize_user_account::initialize_user_account(ctx)
