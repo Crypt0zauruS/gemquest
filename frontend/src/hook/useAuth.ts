@@ -10,10 +10,13 @@ export const useAuth = () => {
 
   const initAuth = useCallback(async () => {
     try {
+      console.log("Initializing AuthService");;
       const response = await fetch("/api/web3auth");
       const data = await response.json();
-      const clientId = data.clientId;
+      // const clientId = data.clientId;
 
+      const clientId = "BIqllUCddxz1syDZrl3tKQEH4MnwjHkL-HcrXYCb_zakRQU8UwcLjsPRiYw81aNN42qhLQ3uLcJ90BxX_g1khGY"!;
+      console.log("Web3Auth client ID:", clientId);
       const web3auth = await getWeb3AuthInstance(clientId);
       const authServiceInstance = new AuthService(web3auth);
       setAuthService(authServiceInstance);
@@ -31,6 +34,7 @@ export const useAuth = () => {
     }
 
     try {
+      console.log("Login requested");
       const result = await authService.login();
       if (result) {
         setLoggedIn(result.isConnected);

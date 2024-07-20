@@ -26,9 +26,9 @@ export default class AuthService {
 
   login = async (): Promise<
     | {
-        isConnected: boolean;
-        web3authProvider: IProvider | null;
-      }
+      isConnected: boolean;
+      web3authProvider: IProvider | null;
+    }
     | undefined
   > => {
     console.log("Web3Auth login requested");

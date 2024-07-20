@@ -23,9 +23,11 @@ let program: Program;
 async function main() {
   const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
+  const DEPLOYER_PRIVATE_KEY = "5goreipUSyZ3eV4Qxi4b4kdfuZo18mKczha6cmTV2FdFshRkLNhwDsvN6H9WTNr7VsW6V8KzyihANZ7BHv52RgpV";
+
   // Set Wallet that will be the admin of the program
   const walletKP = Keypair.fromSecretKey(
-    new Uint8Array(bs58.decode(process.env.DEPLOYER_PRIVATE_KEY))
+    new Uint8Array(bs58.decode(DEPLOYER_PRIVATE_KEY))
   );
   wallet = new anchor.Wallet(walletKP);
   console.log("Wallet:", wallet.publicKey.toBase58());
