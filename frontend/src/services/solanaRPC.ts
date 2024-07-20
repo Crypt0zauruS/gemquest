@@ -469,7 +469,7 @@ export default class SolanaRpc {
     const accounts = await solanaWallet.requestAccounts();
     var userWallet = accounts[0];
 
-    const ENV_DEPLOYER_PRIVATE_KEY = "5goreipUSyZ3eV4Qxi4b4kdfuZo18mKczha6cmTV2FdFshRkLNhwDsvN6H9WTNr7VsW6V8KzyihANZ7BHv52RgpV"; // Set your private key here
+    const ENV_DEPLOYER_PRIVATE_KEY = ""; // Set your private key here
     const adminWallet = Keypair.fromSecretKey(new Uint8Array(bs58.decode(ENV_DEPLOYER_PRIVATE_KEY)));
 
     console.log("signer:", adminWallet.publicKey.toBase58());
