@@ -7,7 +7,7 @@ use {
             mpl_token_metadata::types::DataV2, CreateMasterEditionV3, CreateMetadataAccountsV3,
             Metadata,
         },
-        token::{mint_to, Burn, Mint, MintTo, Token, TokenAccount},
+        token::{mint_to, burn, Burn, Mint, MintTo, Token, TokenAccount},
     },
 };
 
@@ -16,18 +16,18 @@ pub fn create_nft(
     nft_name: String,
     nft_symbol: String,
     nft_uri: String,
-    burn_amount: u64,
+    nft_price: u64,
 ) -> Result<()> {
 
     // Burn tokens before creating the NFT
     let burn_cpi_accounts = Burn {
         mint: ctx.accounts.token_mint.to_account_info(),
-        to: ctx.accounts.user_token_account.to_account_info(),
+        from: ctx.accounts.user_token_account.to_account_info(),
         authority: ctx.accounts.payer.to_account_info(),
     };
     let burn_cpi_program = ctx.accounts.token_program.to_account_info();
     let burn_cpi_ctx = CpiContext::new(burn_cpi_program, burn_cpi_accounts);
-    token::burn(burn_cpi_ctx, burn_amount)?;
+    burn(burn_cpi_ctx, nft_price)?;
 
     // Cross Program Invocation (CPI)
     // Invoking the mint_to instruction on the token program
