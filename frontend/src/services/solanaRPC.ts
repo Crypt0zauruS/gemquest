@@ -332,188 +332,127 @@ export default class SolanaRpc {
 
   mintGems = async (amount: number): Promise<string> => {
     console.log(idl);
+    try {
+      const solanaWallet = new SolanaWallet(this.provider);
+      const connectionConfig = await solanaWallet.request<
+        string[],
+        CustomChainConfig
+      >({
+        method: "solana_provider_config",
+        params: [],
+      });
+      const conn = new Connection(connectionConfig.rpcTarget);
+      const programId = new PublicKey(
+        "EFuE6pLv3CT2PzJLRqpnnz5waiEhwssgLiTVjS4258ox"
+      );
+      const accounts = await solanaWallet.requestAccounts();
+      const wallet = {
+        signTransaction: async (tx: Transaction) => {
+          const signedTx = await solanaWallet.signTransaction(tx);
+          return signedTx;
+        },
+        publicKey: new PublicKey(accounts[0]),
+      };
 
+      const provider = new AnchorProvider(conn, wallet as any, {
+        preflightCommitment: "finalized",
+      });
+      const program = new Program(idl as any, programId, provider);
 
-    const solanaWallet = new SolanaWallet(this.provider);
-    const connectionConfig = await solanaWallet.request<
-      string[],
-      CustomChainConfig
-    >({
-      method: "solana_provider_config",
-      params: [],
-    });
-    const conn = new Connection(connectionConfig.rpcTarget);
-    // const programId = new PublicKey(
-    //   "EFuE6pLv3CT2PzJLRqpnnz5waiEhwssgLiTVjS4258ox"
-    // );
-    const programId = new PublicKey(
-      "9w1KrVJaq6G9ogtLCsiPjKSAC5Ag3DZsbSXkXgdYmsN3"
-    );
-    const accounts = await solanaWallet.requestAccounts();
-    // const wallet = {
-    //   signTransaction: async (tx: Transaction) => {
-    //     const signedTx = await solanaWallet.signTransaction(tx);
-    //     return signedTx;
-    //   },
-    //   publicKey: new PublicKey(accounts[0]),
-    // };
+      const mint = new PublicKey(
+        "6ZD3BRbT8tfvgZvnCw3VL4ccGzaBDHMSfN4L6rGQ9ky7"
+      );
+      const associatedTokenAccount = new PublicKey(
+        "HKViLJQHkuYpXM5P6QoCULx6cTiqMLXJa1Y9Zkmwf2iB"
+      );
 
+      // Décodez la clé privée de mintAuthority
+      const mintAuthoritySecretKey = bs58.decode(
+        process.env.NEXT_PUBLIC_MINT_AUTHORITY_PRIVATE_KEY ?? ""
+      );
+      const mintAuthority = Keypair.fromSecretKey(mintAuthoritySecretKey);
 
+      // Vérifiez si l'account token associé existe
+      let associatedTokenAccountInfo;
+      try {
+        associatedTokenAccountInfo = await getAccount(
+          conn,
+          associatedTokenAccount
+        );
+      } catch (e) {
+        // Si l'account token associé n'existe pas, créez-le
+        console.log("Associated token account does not exist. Creating...");
+        const blockhash = await conn.getLatestBlockhash("finalized");
+        const createTx = new Transaction({
+          recentBlockhash: blockhash.blockhash,
+          feePayer: wallet.publicKey,
+        }).add(
+          createAssociatedTokenAccountInstruction(
+            wallet.publicKey,
+            associatedTokenAccount,
+            wallet.publicKey,
+            mint
+          )
+        );
 
+        const signedCreateTx = await wallet.signTransaction(createTx);
+        const createTxid = await conn.sendRawTransaction(
+          signedCreateTx.serialize()
+        );
+        await conn.confirmTransaction(createTxid);
 
-    const ENV_DEPLOYER_PRIVATE_KEY = "5goreipUSyZ3eV4Qxi4b4kdfuZo18mKczha6cmTV2FdFshRkLNhwDsvN6H9WTNr7VsW6V8KzyihANZ7BHv52RgpV";
-    const walletKP = Keypair.fromSecretKey(new Uint8Array(bs58.decode(ENV_DEPLOYER_PRIVATE_KEY)));
+        // Récupérez les informations de l'account token associé après création
+        associatedTokenAccountInfo = await getAccount(
+          conn,
+          associatedTokenAccount
+        );
+      }
 
-    console.log("signer:", walletKP.publicKey.toBase58());
-    console.log("user:", accounts[0]);
+      // Vérifiez que l'owner de l'account token associé est correct
+      if (!associatedTokenAccountInfo.owner.equals(wallet.publicKey)) {
+        throw new Error(
+          `Incorrect owner for associated token account. Expected ${wallet.publicKey.toBase58()} but found ${associatedTokenAccountInfo.owner.toBase58()}`
+        );
+      }
 
-    const wallett = {
-      signTransaction: async (tx: Transaction) => {
-        const signedTx = await solanaWallet.signTransaction(tx);
-        return signedTx;
-      },
-      publicKey: walletKP,
-    };
-    // const provider = new anchor.AnchorProvider(conn, wallet, {
-    //   commitment: "confirmed",
-    // });
-    // anchor.setProvider(provider);
+      // Obtenez le blockhash pour la nouvelle transaction
+      const blockhash = await conn.getLatestBlockhash("finalized");
 
-    // const wa = new Wallet(walletKP);
-    // const wallettd = new anchor.Wallet(walletKP);
-    const provider = new anchor.AnchorProvider(conn, walletKP as any, {
-      preflightCommitment: "finalized",
-    });
-    anchor.setProvider(provider);
-    const program = new anchor.Program(idl as any, provider);
+      // Mint des tokens
+      const tx2 = new Transaction({
+        recentBlockhash: blockhash.blockhash,
+        feePayer: wallet.publicKey,
+      });
 
-    // const program = new anchor.Program(idl as any, programId, provider);
-    // const program = new anchor.Program(idl as any, programId, provider);
-    console.log(program.programId.toBase58());;
+      const instruction = program.instruction.mintTokensToUser(new BN(amount), {
+        accounts: {
+          mintAuthority: mintAuthority.publicKey,
+          recipient: wallet.publicKey,
+          mintAccount: mint,
+          associatedTokenAccount: associatedTokenAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        },
+      });
 
-    const mint = new PublicKey(
-      "BuLVCNeFRVfPvqj5ov9Vo4CNyWeRDwJa7Lj65bFQd117"
-    );
-    // const associatedTokenAccount = new PublicKey(
-    //   "HKViLJQHkuYpXM5P6QoCULx6cTiqMLXJa1Y9Zkmwf2iB"
-    // );
+      tx2.add(instruction);
 
-    const associatedTokenAccount = getAssociatedTokenAddressSync(mint, new PublicKey(accounts[0]));
-    console.log(associatedTokenAccount.toBase58());
+      // Ajoutez mintAuthority comme signataire
+      tx2.partialSign(mintAuthority);
 
-    // // Décodez la clé privée de mintAuthority
-    // const mintAuthoritySecretKey = bs58.decode(
-    //   process.env.NEXT_PUBLIC_MINT_AUTHORITY_PRIVATE_KEY ?? ""
-    // );
-    // const mintAuthority = Keypair.fromSecretKey(mintAuthoritySecretKey);
+      // Signez et envoyez la transaction de mint
+      const signedTx2 = await wallet.signTransaction(tx2);
+      const txid2 = await conn.sendRawTransaction(signedTx2.serialize());
+      await conn.confirmTransaction(txid2);
 
-    // // Vérifiez si l'account token associé existe
-    // let associatedTokenAccountInfo;
-    // try {
-    //   associatedTokenAccountInfo = await getAccount(
-    //     conn,
-    //     associatedTokenAccount
-    //   );
-    // } catch (e) {
-    //   // Si l'account token associé n'existe pas, créez-le
-    //   console.log("Associated token account does not exist. Creating...");
-    //   const blockhash = await conn.getLatestBlockhash("finalized");
-    //   const createTx = new Transaction({
-    //     recentBlockhash: blockhash.blockhash,
-    //     feePayer: wallet.publicKey,
-    //   }).add(
-    //     createAssociatedTokenAccountInstruction(
-    //       wallet.publicKey,
-    //       associatedTokenAccount,
-    //       wallet.publicKey,
-    //       mint
-    //     )
-    //   );
-
-    //   const signedCreateTx = await wallet.signTransaction(createTx);
-    //   const createTxid = await conn.sendRawTransaction(
-    //     signedCreateTx.serialize()
-    //   );
-    //   await conn.confirmTransaction(createTxid);
-
-    //   // Récupérez les informations de l'account token associé après création
-    //   associatedTokenAccountInfo = await getAccount(
-    //     conn,
-    //     associatedTokenAccount
-    //   );
-    // }
-
-    // // Vérifiez que l'owner de l'account token associé est correct
-    // if (!associatedTokenAccountInfo.owner.equals(wallet.publicKey)) {
-    //   throw new Error(
-    //     `Incorrect owner for associated token account. Expected ${wallet.publicKey.toBase58()} but found ${associatedTokenAccountInfo.owner.toBase58()}`
-    //   );
-    // }
-
-    // Obtenez le blockhash pour la nouvelle transaction
-    const blockhash = await conn.getLatestBlockhash("finalized");
-
-    const instruction = program.instruction.mintTokensToUser(new anchor.BN(amount), {
-      accounts: {
-        mintAuthority: provider.wallet.publicKey,
-        recipient: accounts[0],
-        mintAccount: mint,
-        associatedTokenAccount: associatedTokenAccount,
-
-        tokenProgram: TOKEN_PROGRAM_ID,
-        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-        systemProgram: SystemProgram.programId,
-      },
-    });
-
-    const tx2 = new Transaction({
-      recentBlockhash: blockhash.blockhash,
-      feePayer: provider.wallet.publicKey,
-    });
-    tx2.add(instruction);
-
-
-
-    const transaction = new Transaction().add(
-      instruction
-    );
-
-    console.log("sending Transaction:", transaction);
-    // Sign transaction, broadcast, and confirm
-    const signature = await sendAndConfirmTransaction(
-      conn,
-      transaction,
-      [walletKP],
-    );
-
-    console.log('SIGNATURE', signature);
-    console.log("BRAVO !");
-    // const instruction = program.instruction.mintTokensToUser(new anchor.BN(amount), {
-    //   accounts: {
-    //     mintAuthority: mintAuthority.publicKey,
-    //     recipient: wallet.publicKey,
-    //     mintAccount: mint,
-    //     associatedTokenAccount: associatedTokenAccount,
-    //     tokenProgram: TOKEN_PROGRAM_ID,
-    //     associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-    //     systemProgram: SystemProgram.programId,
-    //   },
-    // });
-
-    // tx2.add(instruction);
-
-    // // Ajoutez mintAuthority comme signataire
-    // tx2.partialSign(mintAuthority);
-
-    // // Signez et envoyez la transaction de mint
-    // const signedTx2 = await wallet.signTransaction(tx2);
-    // const txid2 = await conn.sendRawTransaction(signedTx2.serialize());
-    // await conn.confirmTransaction(txid2);
-
-    // return txid2;
-    return '';
-
+      return txid2;
+    } catch (error) {
+      console.error("Failed to mint tokens:", error);
+      throw error;
+    }
   };
+
 
   mintGemsTest = async (amount: number): Promise<string> => {
 
@@ -530,19 +469,11 @@ export default class SolanaRpc {
     const accounts = await solanaWallet.requestAccounts();
     var userWallet = accounts[0];
 
-    const ENV_DEPLOYER_PRIVATE_KEY = ""; // Set your private key here
+    const ENV_DEPLOYER_PRIVATE_KEY = "5goreipUSyZ3eV4Qxi4b4kdfuZo18mKczha6cmTV2FdFshRkLNhwDsvN6H9WTNr7VsW6V8KzyihANZ7BHv52RgpV"; // Set your private key here
     const adminWallet = Keypair.fromSecretKey(new Uint8Array(bs58.decode(ENV_DEPLOYER_PRIVATE_KEY)));
 
     console.log("signer:", adminWallet.publicKey.toBase58());
     console.log("user:", userWallet);
-
-    const wallett = {
-      signTransaction: async (tx: Transaction) => {
-        const signedTx = await solanaWallet.signTransaction(tx);
-        return signedTx;
-      },
-      publicKey: adminWallet,
-    };
 
     const provider = new anchor.AnchorProvider(conn, adminWallet as any, {
       preflightCommitment: "finalized",

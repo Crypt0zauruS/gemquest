@@ -125,7 +125,7 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
   const mintGems = async () => {
 
     const rpc = new RPC(provider);
-    const tx = await rpc.mintGems(100);
+    const tx = await rpc.mintGemsTest(100);
     try {
       // if (tx) {
       //   console.log("Transaction sent: ", tx);
