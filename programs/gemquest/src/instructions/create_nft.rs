@@ -7,7 +7,7 @@ use {
             mpl_token_metadata::types::DataV2, CreateMasterEditionV3, CreateMetadataAccountsV3,
             Metadata,
         },
-        token::{mint_to, Mint, MintTo, Token, TokenAccount},
+        token::{mint_to, burn, Burn, Mint, MintTo, Token, TokenAccount},
     },
 };
 
@@ -16,8 +16,19 @@ pub fn create_nft(
     nft_name: String,
     nft_symbol: String,
     nft_uri: String,
+    nft_price: u64,
 ) -> Result<()> {
-    
+
+    // Burn tokens before creating the NFT
+    let burn_cpi_accounts = Burn {
+        mint: ctx.accounts.token_mint.to_account_info(),
+        from: ctx.accounts.user_token_account.to_account_info(),
+        authority: ctx.accounts.payer.to_account_info(),
+    };
+    let burn_cpi_program = ctx.accounts.token_program.to_account_info();
+    let burn_cpi_ctx = CpiContext::new(burn_cpi_program, burn_cpi_accounts);
+    burn(burn_cpi_ctx, nft_price)?;
+
     // Cross Program Invocation (CPI)
     // Invoking the mint_to instruction on the token program
     mint_to(
@@ -88,6 +99,14 @@ pub fn create_nft(
 pub struct CreateNFT<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
+
+    // Add user token account to burn from
+    #[account(mut)]
+    pub user_token_account: Account<'info, TokenAccount>,
+
+    // Add token mint account to check the token type and manage burning
+    #[account(mut)]
+    pub token_mint: Account<'info, Mint>,
 
     /// CHECK: Validate address by deriving pda
     #[account(
