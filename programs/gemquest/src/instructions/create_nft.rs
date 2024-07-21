@@ -19,15 +19,29 @@ pub fn create_nft(
     nft_price: u64,
 ) -> Result<()> {
 
+    if nft_name.is_empty() || nft_symbol.is_empty() || nft_uri.is_empty() {
+        return Err(ErrorCode::InvalidInput.into());
+    }
+
+    // Nothing is free in this world
+    if nft_price == 0 {
+        return Err(ErrorCode::InvalidPrice.into());
+    }
+
+    if ctx.accounts.associated_token_account.amount < nft_price {
+        return Err(ErrorCode::InsufficientBalance.into());
+    }
+
+
     // Burn tokens before creating the NFT
-    // let burn_cpi_accounts = Burn {
-    //     mint: ctx.accounts.mint_token_account.to_account_info(),
-    //     from: ctx.accounts.associated_token_account.to_account_info(),
-    //     authority: ctx.accounts.payer.to_account_info(),
-    // };
-    // let burn_cpi_program = ctx.accounts.token_program.to_account_info();
-    // let burn_cpi_ctx = CpiContext::new(burn_cpi_program, burn_cpi_accounts);
-    // burn(burn_cpi_ctx, nft_price)?;
+    let burn_cpi_accounts = Burn {
+        mint: ctx.accounts.mint_token_account.to_account_info(),
+        from: ctx.accounts.associated_token_account.to_account_info(),
+        authority: ctx.accounts.payer.to_account_info(),
+    };
+    let burn_cpi_program = ctx.accounts.token_program.to_account_info();
+    let burn_cpi_ctx = CpiContext::new(burn_cpi_program, burn_cpi_accounts);
+    burn(burn_cpi_ctx, nft_price)?;
 
     // Cross Program Invocation (CPI)
     // Invoking the mint_to instruction on the token program
@@ -104,10 +118,6 @@ pub struct CreateNFT<'info> {
     #[account(mut)]
     pub associated_token_account: Account<'info, TokenAccount>,
 
- ///CHECK: This is not dangerous because we don't read or write from this account
-//  #[account(mut)]
-//  pub associated_token_account: AccountInfo<'info>,
-
     // Add token mint account to check the token type and manage burning
     #[account(mut)]
     pub mint_token_account: Account<'info, Mint>,
@@ -161,4 +171,14 @@ pub struct CreateNFT<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Invalid input provided.")]
+    InvalidInput,
+    #[msg("Invalid price provided.")]
+    InvalidPrice,  
+    #[msg("Insufficient balance.")]
+    InsufficientBalance,
+    #[msg("Unauthorized access.")]
+    Unauthorized,
+}

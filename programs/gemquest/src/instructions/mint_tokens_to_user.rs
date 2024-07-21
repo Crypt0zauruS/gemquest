@@ -8,12 +8,10 @@ use {
 
 
 pub fn mint_tokens_to_user(ctx: Context<MintTokensToUser>, amount: u64) -> Result<()> {
-    msg!("Minting tokens to associated token account...");
-    msg!("Mint: {}", &ctx.accounts.mint_account.key());
-    msg!(
-        "Token Address: {}",
-        &ctx.accounts.associated_token_account.key()
-    );
+
+    if amount == 0 {
+        return Err(ErrorCode::InvalidMintAmount.into());
+    }
 
     // Invoke the mint_to instruction on the token program
     mint_to(
@@ -27,8 +25,6 @@ pub fn mint_tokens_to_user(ctx: Context<MintTokensToUser>, amount: u64) -> Resul
         ),
         amount * 10u64.pow(ctx.accounts.mint_account.decimals as u32), // Mint tokens, adjust for decimals
     )?;
-
-    msg!("Token minted successfully.");
 
     Ok(())
 }
@@ -53,4 +49,12 @@ pub struct MintTokensToUser<'info> {
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
+}
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Unauthorized minting attempt.")]
+    UnauthorizedMinting,
+    #[msg("Mint amount must not be equal to 0.")]
+    InvalidMintAmount,
 }

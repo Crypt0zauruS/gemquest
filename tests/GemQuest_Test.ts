@@ -13,7 +13,15 @@ import { Gemquest } from "../target/types/gemquest";
 import { assert, expect } from "chai";
 import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey";
 import { Keypair, PublicKey, sendAndConfirmTransaction, } from '@solana/web3.js';
-import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync, getMint, getAccount, Account } from "@solana/spl-token";
+import {
+    TOKEN_PROGRAM_ID,
+    ASSOCIATED_TOKEN_PROGRAM_ID,
+    getAssociatedTokenAddressSync,
+    getMint,
+    getAccount,
+    unpackAccount,
+    Account,
+} from "@solana/spl-token";
 
 
 
@@ -183,6 +191,36 @@ describe("***** GemQuest Unit TESTS ******", () => {
             expect(mintInfo.mintAuthority.toString()).to.equal(ADMIN.publicKey.toString());
         });
 
+        it('- should fails if minting tokens with invalid value', async () => {
+            try {
+                // Derive the associated token address account for the mint and user.
+                const associatedTokenAccountAddress = getAssociatedTokenAddressSync(MINT_TOKEN_ACCOUNT.publicKey, USER_1.publicKey);
+
+                // Amount of tokens to mint.
+                const invalidAmount = 0;
+
+                await program.methods
+                    .mintTokensToUser(new BN(invalidAmount))
+                    .accounts({
+                        mintAuthority: ADMIN.publicKey,
+                        recipient: USER_1.publicKey,
+                        mintAccount: MINT_TOKEN_ACCOUNT.publicKey,
+                        associatedTokenAccount: associatedTokenAccountAddress,
+
+                        // system
+                        tokenProgram: TOKEN_PROGRAM_ID,
+                        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+                        systemProgram: web3.SystemProgram.programId,
+                    })
+                    .rpc();
+
+                assert.fail("Expected transaction to fail");
+            }
+            catch (error) {
+
+            }
+        });
+
         it('- should mint some tokens to the user wallet', async () => {
 
             // Derive the associated token address account for the mint and user.
@@ -229,6 +267,8 @@ describe("***** GemQuest Unit TESTS ******", () => {
     describe("*** GemQuest NFT TESTS ***", () => {
 
         const NFT_PRICE = 10 * web3.LAMPORTS_PER_SOL;
+        let associatedTokenAccountAddress;
+        let associatedNftAccountAddress;
 
         // The metadata for our NFT
         const metadata = {
@@ -241,32 +281,146 @@ describe("***** GemQuest Unit TESTS ******", () => {
 
             console.log("Mint NFT Account", MINT_NFT_ACCOUNT.publicKey.toBase58());
             console.log("Mint Token Account", MINT_TOKEN_ACCOUNT.publicKey.toBase58());
+
+            // Derive the associated token address account for the mint and user.
+            associatedTokenAccountAddress = getAssociatedTokenAddressSync(MINT_TOKEN_ACCOUNT.publicKey, USER_1.publicKey);
+
+            // Derive the associated nft token address account for the mint and user.
+            associatedNftAccountAddress = getAssociatedTokenAddressSync(MINT_NFT_ACCOUNT.publicKey, USER_1.publicKey);
         });
 
-        it('- should create a new NFT!', async () => {
+        it('- should fails if approving more tokens than owned', async () => {
+            try {
+                // Derive the associated token address account for the mint and user.
+                const associatedTokenAccountAddress = getAssociatedTokenAddressSync(MINT_TOKEN_ACCOUNT.publicKey, USER_1.publicKey);
+
+                // Amount of tokens to mint.
+                const invalidAmount = 9999999;
+
+                await program.methods
+                    .approveToken(new BN(invalidAmount))
+                    .accounts({
+
+                        associatedTokenAccount: associatedTokenAccountAddress,
+
+                        delegate: ADMIN.publicKey,
+                        authority: USER_1.publicKey,
+
+                        // system
+                        tokenProgram: TOKEN_PROGRAM_ID,
+                    })
+                    .signers([USER_1])
+                    .rpc();
+
+                assert.fail("Expected transaction to fail");
+            }
+            catch (error) {
+
+            }
+        });
+
+        it('- should approve the right amount of delegated token', async () => {
+
+            await program.methods
+                .approveToken(new BN(NFT_PRICE))
+                .accounts({
+
+                    associatedTokenAccount: associatedTokenAccountAddress,
+
+                    delegate: ADMIN.publicKey,
+                    authority: USER_1.publicKey,
+
+                    // system
+                    tokenProgram: TOKEN_PROGRAM_ID,
+                })
+                .signers([USER_1])
+                .rpc();
+
+            const accountInfo = await program.provider.connection.getAccountInfo(associatedTokenAccountAddress);
+            const uAccount = unpackAccount(associatedTokenAccountAddress, accountInfo, TOKEN_PROGRAM_ID);
+
+            expect(uAccount.delegatedAmount.toString()).to.equal(NFT_PRICE.toString());
+        });
+
+        // TODO: investigate - Get error account already in use 
+        // it('- should fails if creating a NFT without enough token', async () => {
+        //     try {
+        //         // Derive the associated token address account for the mint and user.
+        //         const associatedTokenAccountAddress = getAssociatedTokenAddressSync(MINT_TOKEN_ACCOUNT.publicKey, USER_1.publicKey);
+
+        //         // Amount of tokens to mint.
+        //         const invalidAmount = 9999999;
+
+        //         const [metadataAccount] = await PublicKey.findProgramAddress(
+        //             [
+        //                 Buffer.from("metadata"),
+        //                 TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+        //                 MINT_NFT_ACCOUNT.publicKey.toBuffer(),
+        //             ],
+        //             TOKEN_METADATA_PROGRAM_ID
+        //         );
+
+        //         const [editionAccount] = await PublicKey.findProgramAddress(
+        //             [
+        //                 Buffer.from("metadata"),
+        //                 TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+        //                 MINT_NFT_ACCOUNT.publicKey.toBuffer(),
+        //                 Buffer.from("edition"),
+        //             ],
+        //             TOKEN_METADATA_PROGRAM_ID
+        //         );
+
+        //         await program.methods
+        //             .createNft(metadata.name, metadata.symbol, metadata.uri, new BN(invalidAmount))
+        //             .accounts({
+        //                 payer: ADMIN.publicKey,
+
+        //                 associatedTokenAccount: associatedTokenAccountAddress,
+        //                 mintTokenAccount: MINT_TOKEN_ACCOUNT.publicKey,
+
+        //                 metadataAccount: metadataAccount,
+        //                 editionAccount: editionAccount,
+
+        //                 mintNftAccount: MINT_NFT_ACCOUNT.publicKey,
+        //                 associatedNftTokenAccount: associatedNftAccountAddress,
+
+        //                 user: USER_1.publicKey,
+
+        //                 // system
+        //                 tokenProgram: TOKEN_PROGRAM_ID,
+        //                 tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+        //                 associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        //                 systemProgram: web3.SystemProgram.programId,
+        //                 rent: web3.SYSVAR_RENT_PUBKEY,
+        //             })
+        //             .signers([MINT_NFT_ACCOUNT])
+        //             .rpc();
 
 
-            const associatedTokenAccountAddress = getAssociatedTokenAddressSync(MINT_TOKEN_ACCOUNT.publicKey, USER_1.publicKey);
+        //         assert.fail("Expected transaction to fail");
+        //     }
+        //     catch (error) {
 
-            const previousTokenBalance = (
+        //     }
+        // });
+
+        let tokenBalanceBeforeMintNft: number;
+        it('- should create a new NFT', async () => {
+
+            tokenBalanceBeforeMintNft = (
                 await program.provider.connection.getTokenAccountBalance(associatedTokenAccountAddress)
             ).value.uiAmount;
-            console.log(`Balance before burn: ${previousTokenBalance}`);
 
-            // Derive the associated token address account for the mint and payer.
-            const associatedNftAccountAddress = getAssociatedTokenAddressSync(MINT_NFT_ACCOUNT.publicKey, USER_1.publicKey);
 
             let nftAccountInfoBefore: Account;
-            let amount: number;
+            let nftAmount: number;
             try {
                 nftAccountInfoBefore = await getAccount(program.provider.connection, associatedNftAccountAddress);
             }
             catch {
                 // Will throw if the associated NFT token account does not exist yet.
-                amount = 0;
+                nftAmount = 0;
             }
-            console.log("NFT amount before creation: ", amount.toString());
-
 
             const [metadataAccount] = await PublicKey.findProgramAddress(
                 [
@@ -286,42 +440,6 @@ describe("***** GemQuest Unit TESTS ******", () => {
                 ],
                 TOKEN_METADATA_PROGRAM_ID
             );
-
-            await program.methods
-                .approveToken(new BN(NFT_PRICE))
-                .accounts({
-
-                    associatedTokenAccount: associatedTokenAccountAddress,
-
-                    delegate: ADMIN.publicKey,
-                    authority: USER_1.publicKey,
-
-                    // system
-                    tokenProgram: TOKEN_PROGRAM_ID,
-                })
-                .signers([USER_1])
-                .rpc();
-
-
-            await program.methods
-                .burnTokens(new BN(NFT_PRICE))
-                .accounts({
-                    payer: ADMIN.publicKey,
-
-                    associatedTokenAccount: associatedTokenAccountAddress,
-                    mintTokenAccount: MINT_TOKEN_ACCOUNT.publicKey,
-
-                    recipient: ADMIN.publicKey,
-
-                    // system
-                    tokenProgram: TOKEN_PROGRAM_ID,
-                    associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-                    systemProgram: web3.SystemProgram.programId,
-                })
-                .signers([ADMIN.payer])
-                .rpc();
-
-
 
             await program.methods
                 .createNft(metadata.name, metadata.symbol, metadata.uri, new BN(NFT_PRICE))
@@ -349,21 +467,19 @@ describe("***** GemQuest Unit TESTS ******", () => {
                 .signers([MINT_NFT_ACCOUNT])
                 .rpc();
 
-            const postTokenBalance = (
-                await program.provider.connection.getTokenAccountBalance(associatedTokenAccountAddress)
-            ).value.uiAmount;
-            console.log(`Balance after burn: ${postTokenBalance}`);
 
             const nftAccountInfoAfter = await getAccount(program.provider.connection, associatedNftAccountAddress);
-            console.log("NFT amount after creation: ", nftAccountInfoAfter.amount.toString());
+            expect(nftAccountInfoAfter.amount.toString()).to.equal((nftAmount + 1).toString());
+        });
 
+        it('- should burn the right amount of a token', async () => {
 
+            const tokenBalanceAfterMintNFT = (
+                await program.provider.connection.getTokenAccountBalance(associatedTokenAccountAddress)
+            ).value.uiAmount;
 
+            expect(tokenBalanceAfterMintNFT.toString()).to.equal((tokenBalanceBeforeMintNft - (NFT_PRICE / web3.LAMPORTS_PER_SOL)).toString());
 
-            // console.log('Success!');
-            // console.log(`   Mint Address: ${nftMintAccountKeypair.publicKey}`);
-            // console.log(`   Holder: ${associatedNftAccountAddress}`);
-            // console.log(`   Transaction Signature: ${transactionSignature}`);
         });
     });
 

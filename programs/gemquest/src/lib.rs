@@ -1,13 +1,6 @@
 
 use {
-    anchor_lang::prelude::*,
-    anchor_spl::{
-        metadata::{
-            create_metadata_accounts_v3, mpl_token_metadata::types::DataV2,
-            CreateMetadataAccountsV3, Metadata,
-        },
-        token::{Mint, Token},
-    },
+    anchor_lang::prelude::*
 };
 // declare_id!("HAsE96RGMoeLahbUh8iQ7XF6NmGZyk5bbtoEkG4zE1F1");
 declare_id!("3Xd5SVnmd5jbxaBewoHrhB9nx8Dm9AJ5AQQHJ1xJPDUt");
@@ -49,10 +42,6 @@ pub mod gemquest {
         nft_price: u64,
     ) -> Result<()> {
         instructions::create_nft::create_nft(ctx, nft_name, nft_symbol, nft_uri, nft_price)
-    }
-
-    pub fn burn_tokens(ctx: Context<BurnTokens>, amount: u64,) -> Result<()> {
-        instructions::burn_tokens::burn_tokens(ctx, amount)
     }
 
     pub fn approve_token(ctx: Context<ApproveToken>, amount: u64) -> Result<()> {

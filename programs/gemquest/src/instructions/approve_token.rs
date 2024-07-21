@@ -1,17 +1,15 @@
 use {
     anchor_lang::prelude::*,
     anchor_spl::{
-        associated_token::AssociatedToken,
-        metadata::{
-            create_master_edition_v3, create_metadata_accounts_v3,
-            mpl_token_metadata::types::DataV2, CreateMasterEditionV3, CreateMetadataAccountsV3,
-            Metadata,
-        },
-        token::{approve, Approve, Token},
+        token::{approve, Approve, Token, TokenAccount},
     },
 };
 
 pub fn approve_token(ctx: Context<ApproveToken>, amount: u64) -> Result<()> {
+
+    if ctx.accounts.associated_token_account.amount < amount {
+        return Err(ErrorCode::InsufficientFunds.into());
+    }
 
     let cpi_accounts = Approve {
         to: ctx.accounts.associated_token_account.to_account_info(),
@@ -32,10 +30,18 @@ pub fn approve_token(ctx: Context<ApproveToken>, amount: u64) -> Result<()> {
 pub struct ApproveToken<'info> {
     ///CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
-    pub associated_token_account: AccountInfo<'info>,
+    pub associated_token_account: Account<'info, TokenAccount>,
     ///CHECK: This is not dangerous because we don't read or write from this account
     pub delegate: AccountInfo<'info>,
     pub authority: Signer<'info>,
 
     pub token_program: Program<'info, Token>,
+}
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("The authority is not authorized.")]
+    Unauthorized,
+    #[msg("Insufficient funds in the associated token account.")]
+    InsufficientFunds,
 }
