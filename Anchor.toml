@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-gemquest = "EFuE6pLv3CT2PzJLRqpnnz5waiEhwssgLiTVjS4258ox"
+gemquest = "cgGGDYw43q5Bf6U92BCM5xyNuQ5WYYC4zjhcDkbDT3f"
 
 [registry]
 url = "https://api.apr.dev"
@@ -15,6 +15,7 @@ cluster = "Devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
+deploille = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 scripts/deploy.ts"
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.js"
 
 [test]
