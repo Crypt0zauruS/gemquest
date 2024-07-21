@@ -6,6 +6,7 @@ import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token
 
 import bs58 from "bs58";
 import "dotenv/config";
+import { keypairPayer } from '@metaplex-foundation/umi';
 
 // Address of the deployed program.
 // const programId = new PublicKey('HAsE96RGMoeLahbUh8iQ7XF6NmGZyk5bbtoEkG4zE1F1');
@@ -21,12 +22,21 @@ let provider: anchor.AnchorProvider;
 
 async function main() {
 
-  const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+  // const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+  const connection = new Connection("http://127.0.0.1:8899", "confirmed");
 
   // Set Wallet that will be the admin of the program
-  const walletKP = Keypair.fromSecretKey(new Uint8Array(bs58.decode(process.env.DEPLOYER_PRIVATE_KEY)));
-  wallet = new anchor.Wallet(walletKP);
+  // const walletKP = Keypair.fromSecretKey(new Uint8Array(bs58.decode(process.env.DEPLOYER_PRIVATE_KEY)));
+  // wallet = new anchor.Wallet(walletKP);
+  wallet = new anchor.Wallet(Keypair.generate());
   console.log("Wallet:", wallet.publicKey.toBase58());
+
+  const airdropSignature = await connection.requestAirdrop(
+    wallet.publicKey,
+    2 * anchor.web3.LAMPORTS_PER_SOL
+  );
+
+  await connection.confirmTransaction(airdropSignature);
 
   // Set provider
   provider = new anchor.AnchorProvider(connection, wallet, {
@@ -43,15 +53,14 @@ async function main() {
 
 
 
-  await InitializeProgramAdmin();
+  //await InitializeProgramAdmin();
 
-
-  const metadataNFT_FreeSnack = {
-    name: 'Free Snack V4',
-    symbol: 'GQFS',
-    uri: 'ipfs://bafybeibb5rh62yfijm7ypoaphsz4rzvf7wlvjucicafu5v3eq2aur3rv3a/GQFS.json',
-  };
-  await CreateNFT(metadataNFT_FreeSnack);
+  // const metadataNFT_FreeSnack = {
+  //   name: 'Free Snack V4',
+  //   symbol: 'GQFS',
+  //   uri: 'ipfs://bafybeibb5rh62yfijm7ypoaphsz4rzvf7wlvjucicafu5v3eq2aur3rv3a/GQFS.json',
+  // };
+  // await CreateNFT(metadataNFT_FreeSnack);
 
   const metadataToken_GEM = {
     name: 'Solana GEMS',
