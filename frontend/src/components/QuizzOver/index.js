@@ -3,7 +3,7 @@ import { GiTrophyCup } from "react-icons/gi";
 import { SiStartrek } from "react-icons/si";
 import Loader from "../Loader";
 import { gemAddresses } from "@/utils";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import { useTheme } from "../../lib/ThemeContext";
 import RPC from "../../services/solanaRPC";
 
@@ -18,10 +18,12 @@ const QuizzOver = forwardRef((props, ref) => {
     askedQuestions,
     isLastLevel,
     provider,
+    setQuizData,
+    logout,
   } = props;
 
   const [loading, setLoading] = useState(false);
-  const { difficulty, isSignedIn } = useTheme();
+  const { difficulty, isSignedIn, setIsSignedIn } = useTheme();
   const [gemsEarned, setGemsEarned] = useState(0);
 
   const getFinalMessage = (score) => {
@@ -75,11 +77,36 @@ const QuizzOver = forwardRef((props, ref) => {
         }
       }
       await Promise.all(mintingTasks);
+      toast.success(`${gemsEarned} gems minted in your wallet !`, {
+        theme: "dark",
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        progress: undefined,
+      });
       setGemsEarned(0);
     } catch (error) {
       console.error(error);
+      toast.error("Error during minting", {
+        theme: "dark",
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        progress: undefined,
+      });
     } finally {
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+        setQuizData(null);
+        setIsSignedIn(false);
+        logout();
+      }, 2000);
     }
   };
 

@@ -1,17 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Loader from "../components/Loader";
-import { PublicKey } from "@solana/web3.js";
 import { useRouter } from "next/router";
 import RPC from "../services/solanaRPC";
-import { gemMetadataAccounts, ipfsGateway } from "../utils";
-import {
-  mplTokenMetadata,
-  fetchDigitalAssetByMetadata,
-} from "@metaplex-foundation/mpl-token-metadata";
+import { ipfsGateway } from "../utils";
+import { mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import Logout from "../components/Logout";
 
@@ -22,10 +18,24 @@ interface LoginProps {
   provider: any;
 }
 
+interface Nft {
+  name: string;
+  image: string;
+  symbol?: string;
+  description?: string;
+  properties?: {
+    gem_cost?: number;
+  };
+}
+
 const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
+  const router = useRouter();
+
   const [totalGems, setTotalGems] = useState(0);
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedNft, setSelectedNft] = useState<Nft | null>(null);
   const [loader, setLoader] = useState(false);
   const [userGems, setUserGems] = useState<{
     [key: string]: number;
@@ -36,105 +46,93 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
     gem20: 0,
   });
   const [gemsMetadata, setGemsMetadata] = useState<{
-    gem1: any;
-    gem5: any;
-    gem10: any;
-    gem20: any;
-  }>({
-    gem1: {},
-    gem5: {},
-    gem10: {},
-    gem20: {},
-  } as { gem1: any; gem5: any; gem10: any; gem20: any });
+    gem1?: any;
+    gem5?: any;
+    gem10?: any;
+    gem20?: any;
+  }>({});
   const umi = createUmi("https://api.devnet.solana.com").use(
     mplTokenMetadata()
   );
-  const router = useRouter();
+
+  const [nftMetadata, setNftMetadata] = useState<{
+    [key: string]: any;
+  }>({});
+
+  const [isRewardsModalOpen, setIsRewardsModalOpen] = useState(false);
+
+  const openRewardsModal = () => {
+    setIsRewardsModalOpen(true);
+  };
+
+  const closeRewardsModal = () => {
+    setIsRewardsModalOpen(false);
+  };
 
   useEffect(() => {
     if (loggedIn && provider) {
-      fetchUserGems();
-      fetchGemsMetadata();
+      fetchData();
     } else {
-      setUserGems({
-        gem1: 0,
-        gem5: 0,
-        gem10: 0,
-        gem20: 0,
-      });
+      resetData();
       logout();
       router.push("/");
     }
   }, [loggedIn, provider]);
 
-  const fetchUserGems = async () => {
+  const fetchData = useCallback(async () => {
     setLoader(true);
     try {
       const rpc = new RPC(provider);
-      const gems = await rpc.fetchGems();
+      const [gems, nftMetadata, gemsMetadata] = await Promise.all([
+        rpc.fetchGems(),
+        rpc.fetchNFT(),
+        rpc.fetchGemsMetadata(),
+      ]);
+
       setUserGems(gems);
-      console.log("User gems:", gems);
       setTotalGems(
         gems.gem1 * 1 + gems.gem5 * 5 + gems.gem10 * 10 + gems.gem20 * 20
       );
+      setNftMetadata(nftMetadata);
+      setGemsMetadata(gemsMetadata);
+      console.table({ gems, nftMetadata, gemsMetadata });
     } catch (err) {
-      setError("Failed to fetch user gems");
+      setError("Failed to fetch data");
+      console.error(err);
     } finally {
       setLoader(false);
     }
-  };
+  }, [provider]);
 
-  const fetchGemsMetadata = async () => {
-    setLoader(true);
-    try {
-      const getMetadata = async (metadataAccount: string) => {
-        const metadataPDA: any = [new PublicKey(metadataAccount), 0];
-        const asset = await fetchDigitalAssetByMetadata(umi, metadataPDA);
-        return asset;
-      };
-      const gem1Metadata = await getMetadata(gemMetadataAccounts[1]);
-      const gem5Metadata = await getMetadata(gemMetadataAccounts[5]);
-      const gem10Metadata = await getMetadata(gemMetadataAccounts[10]);
-      const gem20Metadata = await getMetadata(gemMetadataAccounts[20]);
-
-      const gemsMetadataUrls = {
-        gem1: gem1Metadata.metadata.uri,
-        gem5: gem5Metadata.metadata.uri,
-        gem10: gem10Metadata.metadata.uri,
-        gem20: gem20Metadata.metadata.uri,
-      };
-
-      // Function to fetch JSON data from IPFS
-      const fetchJsonFromIpfs = async (url: string) => {
-        const response = await fetch(url.replace("ipfs://", ipfsGateway));
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        return data;
-      };
-
-      const gem1Data = await fetchJsonFromIpfs(gemsMetadataUrls.gem1);
-      const gem5Data = await fetchJsonFromIpfs(gemsMetadataUrls.gem5);
-      const gem10Data = await fetchJsonFromIpfs(gemsMetadataUrls.gem10);
-      const gem20Data = await fetchJsonFromIpfs(gemsMetadataUrls.gem20);
-
-      setGemsMetadata({
-        gem1: gem1Data,
-        gem5: gem5Data,
-        gem10: gem10Data,
-        gem20: gem20Data,
-      });
-      console.log("Gems metadata:", gemsMetadata);
-    } catch (err) {
-      setError("Failed to fetch gem metadata");
-    } finally {
-      setLoader(false);
-    }
+  const resetData = () => {
+    setUserGems({
+      gem1: 0,
+      gem5: 0,
+      gem10: 0,
+      gem20: 0,
+    });
+    setNftMetadata({});
+    setGemsMetadata({
+      gem1: {},
+      gem5: {},
+      gem10: {},
+      gem20: {},
+    });
+    setTotalGems(0);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  const openDetailModal = (nft: any) => {
+    setSelectedNft(nft);
+    setIsDetailModalOpen(true);
+  };
+
+  const closeDetailModal = () => {
+    setSelectedNft(null);
+    setIsDetailModalOpen(false);
   };
 
   useEffect(() => {
@@ -168,7 +166,9 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
 
   return (
     <div>
-      <Logout logout={logout} />
+      <div style={{ marginTop: "15px" }}>
+        <Logout logout={logout} />
+      </div>
       <ToastContainer />
       <Header />
 
@@ -184,7 +184,17 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
             {loader && <Loader loadingMsg={undefined} styling={undefined} />}
             {loggedIn && !loader && (
               <div>
-                <p className="rules">Welcome to the Marketplace!</p>
+                <h3
+                  className="modalContentNft"
+                  style={{
+                    fontFamily: "Final Frontier",
+                    width: "350px",
+                    fontSize: "1.5rem",
+                    margin: "0 auto",
+                  }}
+                >
+                  Welcome to the Marketplace !
+                </h3>
                 <hr />
                 <div className="gemsContainer">
                   {userGems?.gem1 > 0 && (
@@ -245,6 +255,21 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                   <span>Total gems: {totalGems}</span>
                 </div>
                 <hr />
+                <p
+                  className="modalContentNft"
+                  style={{
+                    fontFamily: "Final Frontier",
+                    color: "orangered",
+                    width: "350px",
+                    fontSize: "1.4rem",
+                    margin: "0 auto",
+                    cursor: "pointer",
+                    marginBottom: "10px",
+                  }}
+                  onClick={openRewardsModal}
+                >
+                  Our rewards to exchange against gems
+                </p>
               </div>
             )}
           </div>
@@ -252,10 +277,20 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
           {isModalOpen && loggedIn && (
             <>
               <div className="overlay"></div>
-              <div className="engage">
-                <div className="rules">
+              <div className="engage" style={{ maxHeight: "300px" }}>
+                <div className="rules" style={{ marginTop: "30px" }}>
                   <p>
-                    Welcome to the Marketplace!
+                    <span
+                      style={{
+                        display: "block",
+                        fontFamily: "Final Frontier",
+                        fontSize: "1.5rem",
+                        color: "skyblue",
+                        marginBottom: "15px",
+                      }}
+                    >
+                      Welcome to the Marketplace !
+                    </span>
                     <br />
                     Here you can exchange you gems for NFTs. <br />
                     Each NFT can be exchanged for free stuffs in the park
@@ -264,12 +299,91 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                 <button
                   className="btnSubmit"
                   type="button"
+                  style={{ marginTop: "30px" }}
                   onClick={closeModal}
                 >
                   Close
                 </button>
               </div>
             </>
+          )}
+          {isRewardsModalOpen && (
+            <div className="modalnft">
+              <div className="modalContentNft">
+                <div>
+                  <h4 style={{ textAlign: "center", margin: "5px" }}>
+                    Exchange those in green ! <br />
+                    You have {totalGems} gems
+                  </h4>
+                </div>
+                <hr />
+                <div className="rewardsContainer">
+                  {Object.keys(nftMetadata).map((key) => (
+                    <div
+                      key={key}
+                      className="rewardItem"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => openDetailModal(nftMetadata[key])}
+                    >
+                      <img
+                        src={nftMetadata[key]?.image?.replace(
+                          "ipfs://",
+                          ipfsGateway
+                        )}
+                        alt={nftMetadata[key]?.name}
+                        className={`rewardImage ${
+                          nftMetadata[key]?.properties?.gem_cost &&
+                          Number(nftMetadata[key]?.properties?.gem_cost) <=
+                            totalGems
+                            ? "green"
+                            : "red"
+                        }`}
+                      />
+                      <h3>{nftMetadata[key]?.name}</h3>
+                      <h3>{nftMetadata[key]?.properties?.gem_cost} gems</h3>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  className="btnResult success"
+                  onClick={closeRewardsModal}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
+          {isDetailModalOpen && selectedNft && (
+            <div className="modalnft">
+              <div className="modalContentNft">
+                <img
+                  src={selectedNft?.image?.replace("ipfs://", ipfsGateway)}
+                  alt={selectedNft?.name}
+                  style={{
+                    width: "85%",
+                    height: "auto",
+                    borderRadius: "10px",
+                    boxShadow: "0 0 5px 8px #000",
+                  }}
+                />
+                <h2>{selectedNft?.name}</h2>
+                <p>Symbol: {selectedNft?.symbol}</p>
+                <p>{selectedNft?.description}</p>
+                <p>Cost: {selectedNft?.properties?.gem_cost} gems</p>
+                <button
+                  className="btnResult"
+                  style={{
+                    fontFamily: "Final Frontier",
+                    fontSize: "0.8rem",
+                    height: "30px",
+                    marginTop: "10px",
+                  }}
+                  onClick={closeDetailModal}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </main>

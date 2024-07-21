@@ -1023,6 +1023,78 @@ input:checked + .slider:before {
   }
 }
 
+.modalnft {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContentNft {
+  color: #00e6e6;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 230, 230, 0.2),
+    transparent
+  );
+  max-height: 90vh;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 600px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 0 15px rgba(0, 230, 230, 0.5),
+    inset 0 0 15px rgba(0, 230, 230, 0.5);
+  overflow-y: scroll !important;
+}
+
+.modalContentNft h3,
+.modalContentNft h2 {
+  text-align: center;
+  margin: 5px;
+  font-family: "Final Frontier" !important;
+}
+
+.red {
+  box-shadow: 0 0 6px 6px rgb(198, 7, 7);
+}
+
+.green {
+  box-shadow: 0 0 6px 6px rgb(7, 198, 7);
+}
+
+.rewardsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.rewardItem {
+  margin: 10px;
+  text-align: center;
+  width: 110px;
+}
+
+.rewardImage {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.rewardsLink {
+  cursor: pointer;
+  color: #007bff;
+}
+
 /* MEDIA QUERIES */
 @media screen and (max-width: 540px) {
   .container .picture {

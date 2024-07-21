@@ -1,21 +1,10 @@
 import * as anchor from "@coral-xyz/anchor";
-import { Program, web3 } from "@coral-xyz/anchor";
-import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { Program } from "@coral-xyz/anchor";
 import { clusterApiUrl, PublicKey, Connection, Keypair } from "@solana/web3.js";
-import {
-  TOKEN_PROGRAM_ID,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
-
 import bs58 from "bs58";
 import "dotenv/config";
 
 const SEED_PROGRAM_ADMIN = "program_admin";
-const SEED_METADATA = "metadata";
-const SEED_EDITION = "edition";
-const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
-  "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
-);
 
 let wallet: anchor.Wallet;
 let program: Program;
@@ -66,8 +55,6 @@ async function InitializeProgramAdmin() {
     .signers([wallet.payer])
     .rpc();
 }
-
-
 
 main().then(
   () => process.exit(),

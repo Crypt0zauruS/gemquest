@@ -99,6 +99,9 @@ All transactions are final and non-refundable.
 Ensure the security of your wallet and private keys; the developers are not liable for any unauthorized access.
 By signing below, you accept and understand these terms.`;
 
+export const ipfsGateway =
+  "https://fuchsia-varying-camel-696.mypinata.cloud/ipfs/";
+
 export const gemAddresses = {
   1: "d7fmaicKsT7YvXjDg3NzLp8FvnSZXPiwTFqC8QdiyyU",
   5: "9z2XXxCgQy7tf5zsmMBbggwZWiDqFexa5JtT3nxbSqW",
@@ -113,5 +116,77 @@ export const gemMetadataAccounts = {
   20: "8a1qtqmbdsJaJnttQW298Jhny6DWzVw5BmDb1c7Ce36r",
 };
 
-export const ipfsGateway =
-  "https://fuchsia-varying-camel-696.mypinata.cloud/ipfs/";
+export const nftMetadata = [
+  {
+    name: "Exclusive Event Access",
+    symbol: "GQEEA",
+    address: "4jMh3wzpLnBsHRJ84KpjVimK5goSDMGJBnBJsA3z2LUe",
+    ATA: "DzDJyp9EsGYZhkh5CqGxL34gGswrHwikALU7575xKQ2N",
+    metadataAccount: "82TJvCpriaPey5ENgMJ9XHj3U1bWPBFb9UnrhRs2FBb",
+    uri: "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQEEA.json",
+  },
+  {
+    name: "Free Drink",
+    symbol: "GQFD",
+    address: "8UViAyErhbW4KidV9f6m7134ezLxFrKCRww8RmEQVxK8",
+    ATA: "5vfDBGZ4X8r5KhqmZfi5o1trPkTQ6UW5u6auTP8HR9vF",
+    metadataAccount: "BWKYC9VW958kBhsrPxcqbPHpPCw41XCq42nhkhx1o2cU",
+    uri: "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQFD.json",
+  },
+  {
+    name: "Free Snack",
+    symbol: "GQFS",
+    address: "DPSkb1ugFgUhZCkJswcB9aMbD85PC3JZ7gBd6unUiGG9",
+    ATA: "BxSgMkMW9u8uUQGjNVwVSEJcEvppuCAJg551csAYQmEL",
+    metadataAccount: "7MwXtgAnkR82pkDHnuWZo51CzWiSzeZfgDz1uE8FBxCi",
+    uri: "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQFS.json",
+  },
+  {
+    name: "Gift Cap",
+    symbol: "GQGC",
+    address: "3BeVjMxTdjKmid127bVhW4nK1wZAXbv8sGVYkFt9YdeL",
+    ATA: "E1TKnChYcLxsqrZx8E6jV68xFvjfmmktDArQfSb9yEVE",
+    metadataAccount: "UdntcUey1RK8ALP5YZyWULyunNde9BnLh4SRbAvDFrc",
+    uri: "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQGC.json",
+  },
+  {
+    name: "Gift Photo",
+    symbol: "GQGP",
+    address: "GEPsehBN63oj2nUMyMMdwbpr1KGpHDyqMhbZuaz1gaki",
+    ATA: "9kaejJHUTaojc2G8hJkS95nRFx5YFjurc5y29FKq2k3",
+    metadataAccount: "77iZnsRZNDQJWCCRXDDUCAe8WSps9k8TMiN1RadKwBLv",
+    uri: "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQGP.json",
+  },
+  {
+    name: "Gift Shop",
+    symbol: "GQGS",
+    address: "77yV4YniWFAA4yvbssHKCi7ThVuMiiJy5CRVAvVCMGSe",
+    ATA: "Haey9mMpsquugbTTLfFQ7r5gbD2U3gEUQjSqaJvUAvJH",
+    metadataAccount: "3DEG5SYQMusrP5Curu9KN95zez2AnLsS1dkT6ek7rg4U",
+    uri: "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQGS.json",
+  },
+  {
+    name: "Skip the Line",
+    symbol: "GQSKL",
+    address: "9g2dgioeCBv9uXAyAVDfXP8zSRGXEGXSKkKZs4Wy1Cyy",
+    ATA: "HGpuMiw17zMCXvR5j5aDyBhmM6pxjnHSaMFf2uegcx8A",
+    metadataAccount: "6BdVaGezt5B93BqQ6L8gKqBprfPQQSmPueCUzWLcW2WN",
+    uri: "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQSKL.json",
+  },
+  {
+    name: "Gift T-shirt",
+    symbol: "GQTS",
+    address: "fdEbne6JLLqudJMyFrDz68oGYpmSF38vnJyoKJJqxGD",
+    ATA: "H7sGcT6LFLymbZUFHdxzHrvZqW3ztUrAjpt4Cd2inkev",
+    metadataAccount: "AcAvwMhP6S1QzxNGNBeg4ivPNR3uVcoeHcGkHgHx4646",
+    uri: "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQTS.json",
+  },
+  {
+    name: "VIP Access",
+    symbol: "GQVIP",
+    address: "Bfy9PgUQk5Tg5NmJQDex7ZrNGTT1Uz321ob1U2W7RaeR",
+    ATA: "9fHhu3m3C27fvjpHXU4TdWwymC26rLXtWizaYyrsoHT9",
+    metadataAccount: "Bw7X532UPt98hu3gHkNnfG3oZ91GqgEQyMQ4ie2VApA7",
+    uri: "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQVIP.json",
+  },
+];

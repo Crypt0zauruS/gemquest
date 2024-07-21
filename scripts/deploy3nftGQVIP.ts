@@ -43,10 +43,27 @@ async function main() {
   program = new Program(idl, provider);
   console.log("Program ID:", program.programId.toBase58());
 
-  // const metadata = await convertIpfsToHttp(
-  //   "ipfs://QmTNdfcWPYmYHrmDnWvXMyjDMYxApxGSGMA41LEYrz3uG9/gem_1.json"
-  // );
-  // await CreateNFT(metadata);
+  async function convertIpfsToHttp(ipfsUrl: string) {
+    const httpMetadataUri = ipfsUrl.replace(
+      "ipfs://",
+      "https://fuchsia-varying-camel-696.mypinata.cloud/ipfs/"
+    );
+    const response = await fetch(httpMetadataUri);
+    const fetched = (await response.json()) as {
+      symbol: any;
+      name: string;
+    };
+    return {
+      name: fetched.name,
+      symbol: fetched.symbol,
+      uri: ipfsUrl,
+    };
+  }
+
+  const metadata = await convertIpfsToHttp(
+    "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQVIP.json"
+  );
+  await CreateNFT(metadata);
 }
 
 /**

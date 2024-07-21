@@ -1,12 +1,12 @@
 import {
   Connection,
+  Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   Transaction,
   TransactionMessage,
   VersionedTransaction,
-  Keypair,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
 import { CustomChainConfig, IProvider } from "@web3auth/base";
@@ -17,15 +17,29 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
-import bs58 from "bs58";
 import { AnchorProvider, BN, Program, setProvider } from "@coral-xyz/anchor";
-import { gemAddresses } from "../utils";
+import {
+  mplTokenMetadata,
+  fetchDigitalAssetByMetadata,
+} from "@metaplex-foundation/mpl-token-metadata";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import {
+  gemAddresses,
+  gemMetadataAccounts,
+  nftMetadata,
+  ipfsGateway,
+} from "../utils";
+import bs58 from "bs58";
 
 export default class SolanaRpc {
   private provider: IProvider;
+  umi: any;
 
   constructor(provider: IProvider) {
     this.provider = provider;
+    this.umi = createUmi("https://api.devnet.solana.com").use(
+      mplTokenMetadata()
+    );
   }
 
   getAccounts = async (): Promise<string[]> => {
@@ -62,7 +76,7 @@ export default class SolanaRpc {
     try {
       const solanaWallet = new SolanaWallet(this.provider);
       const msg = Buffer.from(message, "utf8");
-      const res = await solanaWallet.signMessage(msg);
+      const res = await solanaWallet.signMessage(msg as any);
       return res.toString();
     } catch (error) {
       console.error("Sign message error:", error);
@@ -338,7 +352,6 @@ export default class SolanaRpc {
     // Décodez la clé privée de adminWallet
     const adminWalletSecretKey = bs58.decode(data.privateKey);
     const adminWallet = Keypair.fromSecretKey(adminWalletSecretKey);
-
     const provider = new AnchorProvider(conn, adminWallet as any, {
       preflightCommitment: "finalized",
     });
@@ -431,6 +444,89 @@ export default class SolanaRpc {
       };
     } catch (error) {
       console.error("Failed to fetch user gems:", error);
+      throw error;
+    }
+  };
+
+  fetchGemsMetadata = async (): Promise<{ [key: string]: any }> => {
+    try {
+      const getMetadata = async (metadataAccount: string) => {
+        const metadataPDA: any = [new PublicKey(metadataAccount), 0];
+        const asset = await fetchDigitalAssetByMetadata(this.umi, metadataPDA);
+        return asset;
+      };
+      const fetchJsonFromIpfs = async (url: string) => {
+        const response = await fetch(url.replace("ipfs://", ipfsGateway));
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+      };
+
+      const gem1Metadata = await getMetadata(gemMetadataAccounts[1]);
+      const gem5Metadata = await getMetadata(gemMetadataAccounts[5]);
+      const gem10Metadata = await getMetadata(gemMetadataAccounts[10]);
+      const gem20Metadata = await getMetadata(gemMetadataAccounts[20]);
+
+      const gemsMetadataUrls = {
+        gem1: gem1Metadata.metadata.uri,
+        gem5: gem5Metadata.metadata.uri,
+        gem10: gem10Metadata.metadata.uri,
+        gem20: gem20Metadata.metadata.uri,
+      };
+
+      const gem1Data = await fetchJsonFromIpfs(gemsMetadataUrls.gem1);
+      const gem5Data = await fetchJsonFromIpfs(gemsMetadataUrls.gem5);
+      const gem10Data = await fetchJsonFromIpfs(gemsMetadataUrls.gem10);
+      const gem20Data = await fetchJsonFromIpfs(gemsMetadataUrls.gem20);
+
+      return {
+        gem1: gem1Data,
+        gem5: gem5Data,
+        gem10: gem10Data,
+        gem20: gem20Data,
+      };
+    } catch (error) {
+      console.error("Failed to fetch gems metadata:", error);
+      throw error;
+    }
+  };
+
+  fetchNFT = async (): Promise<{ [key: string]: any }> => {
+    try {
+      const getMetadata = async (metadataAccount: string) => {
+        const metadataPDA: any = [new PublicKey(metadataAccount), 0];
+        const asset = await fetchDigitalAssetByMetadata(this.umi, metadataPDA);
+        return asset;
+      };
+
+      const fetchJsonFromIpfs = async (url: string) => {
+        const response = await fetch(url.replace("ipfs://", ipfsGateway));
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+      };
+
+      const metadata = await Promise.all(
+        nftMetadata.map(async (nft) => {
+          const metadataInfo = await getMetadata(nft.metadataAccount);
+          const metadataUri = metadataInfo.metadata.uri;
+          const metadataJson = await fetchJsonFromIpfs(metadataUri);
+          return { ...nft, metadata: metadataJson };
+        })
+      );
+
+      const metadataMap: { [key: string]: any } = {};
+      metadata.forEach((nft) => {
+        metadataMap[nft.symbol] = nft.metadata;
+      });
+
+      return metadataMap;
+    } catch (error) {
+      console.error("Failed to fetch NFT metadata:", error);
       throw error;
     }
   };

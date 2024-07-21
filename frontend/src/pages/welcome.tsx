@@ -76,6 +76,15 @@ const Welcome = ({
     }
   }, []);
 
+  const handleQuit = () => {
+    setHydrated(false);
+    setTheme(undefined);
+    setDifficulty("easy");
+    setQuizData(null);
+    logout();
+    router.push("/");
+  };
+
   const memoizedQuizData = useMemo(() => quizData, [quizData]);
 
   useEffect(() => {
@@ -108,7 +117,7 @@ const Welcome = ({
   return (
     <div className="quiz-bg">
       <ToastContainer />
-      {isSignedIn && (
+      {isSignedIn ? (
         <div className="container">
           <Logout logout={logout} />
           {loading ? (
@@ -121,9 +130,23 @@ const Welcome = ({
               }}
             />
           ) : (
-            <Quizz quizData={memoizedQuizData} provider={provider} />
+            <Quizz
+              quizData={memoizedQuizData}
+              provider={provider}
+              setQuizData={setQuizData}
+              logout={logout}
+            />
           )}
         </div>
+      ) : (
+        <button
+          className="formContent btnSubmit"
+          style={{ marginTop: "50px" }}
+          type="button"
+          onClick={handleQuit}
+        >
+          Back to Main Menu
+        </button>
       )}
     </div>
   );
