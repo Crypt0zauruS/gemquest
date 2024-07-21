@@ -122,25 +122,6 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
     }
   }, [theme]);
 
-  const mintGems = async () => {
-
-    const rpc = new RPC(provider);
-    const tx = await rpc.mintGemsTest(100);
-    try {
-      // if (tx) {
-      //   console.log("Transaction sent: ", tx);
-      // } else {
-      //   console.error("Transaction failed");
-      // }
-      // console.log(`Minting ${gemsEarned} gems...`);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-
-  };
-
   return (
     <div className="signUpLoginBox">
       <ToastContainer />
@@ -199,7 +180,7 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
                               className="btnSubmit"
                               type="button"
                               disabled={loading || !address}
-                            // onClick={()=>router.push("/marketplace")}
+                              onClick={() => router.push("/marketplace")}
                             >
                               Reach your Marketplace !
                             </button>
@@ -212,13 +193,6 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
                         >
                           Logout
                         </button>
-                        <button
-                          className="btnSubmit"
-                          type="button"
-                          onClick={() => mintGems()}
-                        >
-                          MINT GEMS
-                        </button>
                       </>
                     )}
                   </form>
@@ -229,7 +203,6 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
                   <button className="btnSubmit" type="button" onClick={login}>
                     Connect !
                   </button>
-
                 </div>
               )}
             </div>

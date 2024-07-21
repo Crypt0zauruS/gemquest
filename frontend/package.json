@@ -15,7 +15,7 @@
     "@metaplex-foundation/umi-bundle-defaults": "^0.9.2",
     "@solana-developers/preset-next": "2.2.0",
     "@solana/spl-token": "^0.4.8",
-    "@solana/web3.js": "^1.95.0",
+    "@solana/web3.js": "^1.95.1",
     "@web3auth/base": "^8.8.0",
     "@web3auth/default-solana-adapter": "^8.8.0",
     "@web3auth/modal": "^8.10.2",

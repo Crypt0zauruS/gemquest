@@ -2,6 +2,7 @@ import { forwardRef, memo, useState, useEffect } from "react";
 import { GiTrophyCup } from "react-icons/gi";
 import { SiStartrek } from "react-icons/si";
 import Loader from "../Loader";
+import { gemAddresses } from "@/utils";
 import { ToastContainer } from "react-toastify";
 import { useTheme } from "../../lib/ThemeContext";
 import RPC from "../../services/solanaRPC";
@@ -56,16 +57,25 @@ const QuizzOver = forwardRef((props, ref) => {
   };
 
   const handleMintGems = async () => {
+    let gemsToMint = gemsEarned;
+
+    if (gemsToMint === 0) {
+      return;
+    }
     setLoading(true);
+    const rpc = new RPC(provider);
+    const gemValues = [20, 10, 5, 1];
+    let mintingTasks = [];
     try {
-      const rpc = new RPC(provider);
-      const tx = await rpc.mintGems(gemsEarned);
-      if (tx) {
-        console.log("Transaction sent: ", tx);
-      } else {
-        console.error("Transaction failed");
+      for (const value of gemValues) {
+        const numOfGems = Math.floor(gemsToMint / value);
+        if (numOfGems > 0) {
+          mintingTasks.push(await rpc.mintGems(numOfGems, gemAddresses[value]));
+          gemsToMint -= numOfGems * value;
+        }
       }
-      console.log(`Minting ${gemsEarned} gems...`);
+      await Promise.all(mintingTasks);
+      setGemsEarned(0);
     } catch (error) {
       console.error(error);
     } finally {
@@ -158,9 +168,15 @@ const QuizzOver = forwardRef((props, ref) => {
     <>
       <ToastContainer />
       {decision}
-      {loading && <Loader loadingMsg={"Transaction in progress..."} />}
-      <hr />
-      <div className="answerContainer">{QuestionsAndAnswers}</div>
+      {loading ? (
+        <Loader loadingMsg={"Minting your Gems in progress..."} />
+      ) : (
+        <>
+          {" "}
+          <hr />
+          <div className="answerContainer">{QuestionsAndAnswers}</div>
+        </>
+      )}
     </>
   );
 });

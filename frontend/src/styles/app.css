@@ -962,6 +962,67 @@ input:checked + .slider:before {
   filter: drop-shadow(0 0 0.15rem aqua);
 }
 
+.gemsContainer {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.gemItem {
+  position: relative;
+  width: 120px;
+  height: 200px;
+  padding: 10px;
+}
+
+.gemImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  box-shadow: 0 0 5px 5px greenyellow;
+  border-radius: 10px;
+}
+
+.gemCount {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+  color: #00ff00; /* Sci-fi themed text color */
+  padding: 5px;
+  border-radius: 50%;
+  font-size: 1rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.totalGems {
+  color: #2197ce;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  width: 200px;
+  box-shadow: 0 0 5px 5px red;
+  margin: 0 auto;
+  margin-bottom: 20px;
+  margin-top: 30px;
+  padding: 10px;
+  border-radius: 10px;
+  background-image: linear-gradient(45deg, #a86464, #34343f);
+}
+
+/* Sci-fi animated background effect */
+@keyframes sciFiBackground {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 1000px 1000px;
+  }
+}
+
 /* MEDIA QUERIES */
 @media screen and (max-width: 540px) {
   .container .picture {
