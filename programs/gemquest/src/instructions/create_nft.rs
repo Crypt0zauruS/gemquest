@@ -20,14 +20,14 @@ pub fn create_nft(
 ) -> Result<()> {
 
     // Burn tokens before creating the NFT
-    let burn_cpi_accounts = Burn {
-        mint: ctx.accounts.token_mint.to_account_info(),
-        from: ctx.accounts.user_token_account.to_account_info(),
-        authority: ctx.accounts.payer.to_account_info(),
-    };
-    let burn_cpi_program = ctx.accounts.token_program.to_account_info();
-    let burn_cpi_ctx = CpiContext::new(burn_cpi_program, burn_cpi_accounts);
-    burn(burn_cpi_ctx, nft_price)?;
+    // let burn_cpi_accounts = Burn {
+    //     mint: ctx.accounts.mint_token_account.to_account_info(),
+    //     from: ctx.accounts.associated_token_account.to_account_info(),
+    //     authority: ctx.accounts.payer.to_account_info(),
+    // };
+    // let burn_cpi_program = ctx.accounts.token_program.to_account_info();
+    // let burn_cpi_ctx = CpiContext::new(burn_cpi_program, burn_cpi_accounts);
+    // burn(burn_cpi_ctx, nft_price)?;
 
     // Cross Program Invocation (CPI)
     // Invoking the mint_to instruction on the token program
@@ -35,8 +35,8 @@ pub fn create_nft(
         CpiContext::new(
             ctx.accounts.token_program.to_account_info(),
             MintTo {
-                mint: ctx.accounts.mint_account.to_account_info(),
-                to: ctx.accounts.associated_token_account.to_account_info(),
+                mint: ctx.accounts.mint_nft_account.to_account_info(),
+                to: ctx.accounts.associated_nft_token_account.to_account_info(),
                 authority: ctx.accounts.payer.to_account_info(),
             },
         ),
@@ -50,7 +50,7 @@ pub fn create_nft(
             ctx.accounts.token_metadata_program.to_account_info(),
             CreateMetadataAccountsV3 {
                 metadata: ctx.accounts.metadata_account.to_account_info(),
-                mint: ctx.accounts.mint_account.to_account_info(),
+                mint: ctx.accounts.mint_nft_account.to_account_info(),
                 mint_authority: ctx.accounts.payer.to_account_info(),
                 update_authority: ctx.accounts.payer.to_account_info(),
                 payer: ctx.accounts.payer.to_account_info(),
@@ -79,7 +79,7 @@ pub fn create_nft(
             ctx.accounts.token_metadata_program.to_account_info(),
             CreateMasterEditionV3 {
                 edition: ctx.accounts.edition_account.to_account_info(),
-                mint: ctx.accounts.mint_account.to_account_info(),
+                mint: ctx.accounts.mint_nft_account.to_account_info(),
                 update_authority: ctx.accounts.payer.to_account_info(),
                 mint_authority: ctx.accounts.payer.to_account_info(),
                 payer: ctx.accounts.payer.to_account_info(),
@@ -102,16 +102,20 @@ pub struct CreateNFT<'info> {
 
     // Add user token account to burn from
     #[account(mut)]
-    pub user_token_account: Account<'info, TokenAccount>,
+    pub associated_token_account: Account<'info, TokenAccount>,
+
+ ///CHECK: This is not dangerous because we don't read or write from this account
+//  #[account(mut)]
+//  pub associated_token_account: AccountInfo<'info>,
 
     // Add token mint account to check the token type and manage burning
     #[account(mut)]
-    pub token_mint: Account<'info, Mint>,
+    pub mint_token_account: Account<'info, Mint>,
 
     /// CHECK: Validate address by deriving pda
     #[account(
         mut,
-        seeds = [b"metadata", token_metadata_program.key().as_ref(), mint_account.key().as_ref()],
+        seeds = [b"metadata", token_metadata_program.key().as_ref(), mint_nft_account.key().as_ref()],
         bump,
         seeds::program = token_metadata_program.key(),
     )]
@@ -120,7 +124,7 @@ pub struct CreateNFT<'info> {
     /// CHECK: Validate address by deriving pda
     #[account(
         mut,
-        seeds = [b"metadata", token_metadata_program.key().as_ref(), mint_account.key().as_ref(), b"edition"],
+        seeds = [b"metadata", token_metadata_program.key().as_ref(), mint_nft_account.key().as_ref(), b"edition"],
         bump,
         seeds::program = token_metadata_program.key(),
     )]
@@ -134,21 +138,27 @@ pub struct CreateNFT<'info> {
         mint::authority = payer.key(),
         mint::freeze_authority = payer.key(),
     )]
-    pub mint_account: Account<'info, Mint>,
+    pub mint_nft_account: Account<'info, Mint>,
 
     // Create associated token account, if needed
     // This is the account that will hold the NFT
     #[account(
         init_if_needed,
         payer = payer,
-        associated_token::mint = mint_account,
-        associated_token::authority = payer,
+        associated_token::mint = mint_nft_account,
+        associated_token::authority = user,
     )]
-    pub associated_token_account: Account<'info, TokenAccount>,
+    pub associated_nft_token_account: Account<'info, TokenAccount>,
 
+    /// CHECK: yser account
+    #[account(mut)]
+    pub user: UncheckedAccount<'info>,
+    
     pub token_program: Program<'info, Token>,
     pub token_metadata_program: Program<'info, Metadata>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
 }
+
+

@@ -10,7 +10,7 @@ use {
     },
 };
 // declare_id!("HAsE96RGMoeLahbUh8iQ7XF6NmGZyk5bbtoEkG4zE1F1");
-declare_id!("9w1KrVJaq6G9ogtLCsiPjKSAC5Ag3DZsbSXkXgdYmsN3");
+declare_id!("3Xd5SVnmd5jbxaBewoHrhB9nx8Dm9AJ5AQQHJ1xJPDUt");
 
 pub mod instructions;
 
@@ -49,5 +49,13 @@ pub mod gemquest {
         nft_price: u64,
     ) -> Result<()> {
         instructions::create_nft::create_nft(ctx, nft_name, nft_symbol, nft_uri, nft_price)
+    }
+
+    pub fn burn_tokens(ctx: Context<BurnTokens>, amount: u64,) -> Result<()> {
+        instructions::burn_tokens::burn_tokens(ctx, amount)
+    }
+
+    pub fn approve_token(ctx: Context<ApproveToken>, amount: u64) -> Result<()> {
+        instructions::approve_token::approve_token(ctx, amount)
     }
 }
