@@ -1317,7 +1317,7 @@ dependencies = [
  "borsh 0.10.3",
  "num-derive 0.3.3",
  "num-traits",
- "solana-program",
+ "solana-program 1.18.18",
  "thiserror",
 ]
 
