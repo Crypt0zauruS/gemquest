@@ -1,17 +1,17 @@
-
 use {
     anchor_lang::prelude::*,
     anchor_spl::{
         associated_token::AssociatedToken,
         token::{mint_to, Mint, MintTo, Token, TokenAccount},
     },
-    
 };
 
+
 pub fn mint_tokens_to_user(ctx: Context<MintTokensToUser>, amount: u64) -> Result<()> {
-    msg!("Minting tokens to associated token account...");
-    msg!("Mint: {}", &ctx.accounts.mint_account.key());
-    msg!("Token Address: {}", &ctx.accounts.associated_token_account.key());
+
+    if amount == 0 {
+        return Err(ErrorCode::InvalidMintAmount.into());
+    }
 
     // Invoke the mint_to instruction on the token program
     mint_to(
@@ -26,19 +26,20 @@ pub fn mint_tokens_to_user(ctx: Context<MintTokensToUser>, amount: u64) -> Resul
         amount * 10u64.pow(ctx.accounts.mint_account.decimals as u32), // Mint tokens, adjust for decimals
     )?;
 
-    msg!("Token minted successfully.");
-
     Ok(())
 }
+
 
 #[derive(Accounts)]
 pub struct MintTokensToUser<'info> {
     #[account(mut)]
     pub mint_authority: Signer<'info>,
-   
-    #[account(mut)]
-     /// CHECK: The recipient account is mutable
-    pub recipient: AccountInfo<'info>, 
+
+    // #[account(mut)]
+    //  /// CHECK: The recipient account is mutable
+    // pub recipient: AccountInfo<'info>, 
+
+    pub recipient: SystemAccount<'info>,
     #[account(mut)]
     pub mint_account: Account<'info, Mint>,
     #[account(
@@ -52,4 +53,12 @@ pub struct MintTokensToUser<'info> {
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
+}
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Unauthorized minting attempt.")]
+    UnauthorizedMinting,
+    #[msg("Mint amount must not be equal to 0.")]
+    InvalidMintAmount,
 }

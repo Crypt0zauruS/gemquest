@@ -11,22 +11,16 @@ gemquest = "cgGGDYw43q5Bf6U92BCM5xyNuQ5WYYC4zjhcDkbDT3f"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Devnet"
+cluster = "http://127.0.0.1:8899"
 wallet = "~/.config/solana/id.json"
-
-[scripts]
-deploille = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 scripts/deploy.ts"
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.js"
 
 [test]
 startup_wait = 5000
 shutdown_wait = 2000
 upgradeable = false
 
-[test.validator]
-bind_address = "0.0.0.0"
-ledger = ".anchor/test-ledger"
-rpc_port = 8899
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 
 [[test.validator.clone]]
 address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"

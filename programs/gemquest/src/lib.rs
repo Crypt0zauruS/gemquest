@@ -37,7 +37,12 @@ pub mod gemquest {
         nft_name: String,
         nft_symbol: String,
         nft_uri: String,
+        nft_price: u64,
     ) -> Result<()> {
-        instructions::create_nft::create_nft(ctx, nft_name, nft_symbol, nft_uri)
+        instructions::create_nft::create_nft(ctx, nft_name, nft_symbol, nft_uri, nft_price)
+    }
+
+    pub fn approve_token(ctx: Context<ApproveToken>, amount: u64) -> Result<()> {
+        instructions::approve_token::approve_token(ctx, amount)
     }
 }
