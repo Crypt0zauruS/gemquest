@@ -15,8 +15,7 @@ const Header = () => {
           <>
             <hr />
             <h4>
-              Manage your amusement park tickets and get free stuff! <br />
-              Test your knowledge of the Sci-Fi universes to win gems!
+              Test your knowledge of the Sci-Fi universes to win 💎
               <br /> And exchange them for rewards!
             </h4>
             <hr />

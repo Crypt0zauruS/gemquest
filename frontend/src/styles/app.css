@@ -24,7 +24,7 @@
 
 html,
 body {
-  height: 100%;
+  height: 100vh;
   margin: 0;
   padding: 0;
   display: flex;
@@ -155,6 +155,7 @@ header,
 }
 
 .banner-container {
+  position: sticky;
   padding: 20px 0;
   flex-basis: 80%;
 }
@@ -184,6 +185,8 @@ header,
   color: var(--light-grey-color);
   padding: 10px 0 !important;
   width: 100% !important;
+  position: relative !important;
+  bottom: 0 !important;
 }
 
 .footer-container p {
@@ -201,7 +204,7 @@ header,
   flex: 0 1 80%;
   display: flex;
   justify-content: center;
-  min-height: 60vh;
+  height: 100vh;
 }
 
 .formBoxLeftLogin {
@@ -247,7 +250,7 @@ header,
 
 .formContent .inputBox {
   position: relative;
-  height: 80px;
+  height: 140px;
 }
 
 .formContent .inputBox p {

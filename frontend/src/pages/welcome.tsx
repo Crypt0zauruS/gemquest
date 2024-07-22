@@ -4,6 +4,7 @@ import Quizz from "../components/Quizz";
 import { useTheme } from "../lib/ThemeContext";
 import { ToastContainer, toast } from "react-toastify";
 import { useRouter } from "next/router";
+import gemQuest from "../images/gemquest.webp";
 import Loader from "../components/Loader";
 
 const Welcome = ({
@@ -139,14 +140,29 @@ const Welcome = ({
           )}
         </div>
       ) : (
-        <button
-          className="formContent btnSubmit"
-          style={{ marginTop: "50px" }}
-          type="button"
-          onClick={handleQuit}
-        >
-          Back to Main Menu
-        </button>
+        <div className="formContent">
+          <button
+            className="btnSubmit"
+            style={{ marginTop: "50px", marginBottom: "30px" }}
+            type="button"
+            onClick={handleQuit}
+          >
+            Main Menu
+          </button>
+
+          <img
+            src={gemQuest.src}
+            alt="GemQuest"
+            style={{
+              display: "block",
+              maxWidth: "600px",
+              width: "90%",
+              margin: "0 auto",
+              borderRadius: "10px",
+              boxShadow: "0 0 5px 5px skyblue",
+            }}
+          />
+        </div>
       )}
     </div>
   );

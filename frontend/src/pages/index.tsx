@@ -38,6 +38,7 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
     isSignedIn,
   } = useTheme();
   const [showScanner, setShowScanner] = useState(false);
+  const [hide, setHide] = useState(true);
 
   useEffect(() => {
     if (provider && loggedIn) {
@@ -116,6 +117,18 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
     setLoading(false);
   };
 
+  const formatSolanaAddress = () => {
+    if (!address) {
+      return "";
+    }
+    if (address.length <= 10) {
+      return address; // Adresse trop courte pour être formatée
+    }
+    const firstPart = address.slice(0, 7);
+    const lastPart = address.slice(-7);
+    return `${firstPart}...${lastPart}`;
+  };
+
   useEffect(() => {
     if (theme) {
       handleScanSuccess(theme);
@@ -149,18 +162,20 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
                   <form className="inputBox">
                     {balance && address && (
                       <p>
-                        {address}
+                        {formatSolanaAddress()}
                         <br />
                         <span
                           style={{
                             color: "orangered",
                             fontSize: "1.2rem ",
                             border: "none",
+                            cursor: "pointer",
                           }}
+                          onClick={() => setHide(!hide)}
                         >
                           Balance:
                         </span>{" "}
-                        ${balance?.toFixed(4)} SOL
+                        {hide ? "********" : balance?.toFixed(4)} SOL
                       </p>
                     )}
                     <hr />

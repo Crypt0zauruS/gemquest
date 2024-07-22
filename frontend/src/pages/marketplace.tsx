@@ -268,7 +268,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                   }}
                   onClick={openRewardsModal}
                 >
-                  Our rewards to exchange against gems
+                  Our rewards to exchange against 💎
                 </p>
               </div>
             )}
@@ -292,7 +292,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                       Welcome to the Marketplace !
                     </span>
                     <br />
-                    Here you can exchange you gems for NFTs. <br />
+                    Here you can exchange your Gems💍 for NFTs. <br />
                     Each NFT can be exchanged for free stuffs in the park
                   </p>
                 </div>
@@ -340,7 +340,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                         }`}
                       />
                       <h3>{nftMetadata[key]?.name}</h3>
-                      <h3>{nftMetadata[key]?.properties?.gem_cost} gems</h3>
+                      <h3>{nftMetadata[key]?.properties?.gem_cost} 💎</h3>
                     </div>
                   ))}
                 </div>
@@ -369,7 +369,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                 <h2>{selectedNft?.name}</h2>
                 <p>Symbol: {selectedNft?.symbol}</p>
                 <p>{selectedNft?.description}</p>
-                <p>Cost: {selectedNft?.properties?.gem_cost} gems</p>
+                <p>Cost: {selectedNft?.properties?.gem_cost} 💎</p>
                 <button
                   className="btnResult"
                   style={{
