@@ -102,19 +102,38 @@ By signing below, you accept and understand these terms.`;
 export const ipfsGateway =
   "https://fuchsia-varying-camel-696.mypinata.cloud/ipfs/";
 
+export const tokenMetadataProgramId =
+  "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s";
+
+// Alex adresses
 export const gemAddresses = {
-  1: "d7fmaicKsT7YvXjDg3NzLp8FvnSZXPiwTFqC8QdiyyU",
-  5: "9z2XXxCgQy7tf5zsmMBbggwZWiDqFexa5JtT3nxbSqW",
-  10: "B3tPLCZCn31iimk6GzSavqUzN12kiUbfxYjTiDNs86cn",
-  20: "BAQ7NE5emVFHjT5BhHVUxjxjCfX1SkjNsmVPJ34rHcYA",
+  1: "tbvf6yzmE1R9tDuURQBVELZk2ZvTgyw2jviGUhhuXEe",
+  5: "8hehtuBK7YCoyzXCVJmnubSjpRLeekgXWXQ21AhHbK49",
+  10: "9h2ccTeZpFpBgPMzFFoRUT54173TnAKhEZaKxhuyGZzH",
+  20: "A4e2eycpz8g7HuW8H7vtaNm3pySHGU7SKdd3RnQpUPKf",
 };
 
 export const gemMetadataAccounts = {
-  1: "83tFCpXxr7mm6E7ehkw9jLskTT6jr1u5apkaBtq7nBBy",
-  5: "GYFqqHY8HoSKbeLrnN9YGfQQG99qPypvYJpqqcBCrKAY",
-  10: "BbnZ17N4Xsp2H57vexbuY1CfbttaysCL4Js3i68hChNf",
-  20: "8a1qtqmbdsJaJnttQW298Jhny6DWzVw5BmDb1c7Ce36r",
+  1: "FPyhUWkrc24QwWmvzbzW4eRgrkQ16yV7d35K3jz5mFgx",
+  5: "HWKQP6qn5GYk5RzgeLFEu7qXRS2Pt9v8f57xXYLhexCi",
+  10: "H6K9DMEJdcSjKVt7RDqAH3LohJrZS2h48PCaRaMycKXs",
+  20: "AYpwBTDwDx9RKABQtEqanwFQCmb7Krv3AbPhbyP5QGfV",
 };
+
+// Maxence adresses
+// export const gemAddresses = {
+//   1: "d7fmaicKsT7YvXjDg3NzLp8FvnSZXPiwTFqC8QdiyyU",
+//   5: "9z2XXxCgQy7tf5zsmMBbggwZWiDqFexa5JtT3nxbSqW",
+//   10: "B3tPLCZCn31iimk6GzSavqUzN12kiUbfxYjTiDNs86cn",
+//   20: "BAQ7NE5emVFHjT5BhHVUxjxjCfX1SkjNsmVPJ34rHcYA",
+// };
+
+// export const gemMetadataAccounts = {
+//   1: "83tFCpXxr7mm6E7ehkw9jLskTT6jr1u5apkaBtq7nBBy",
+//   5: "GYFqqHY8HoSKbeLrnN9YGfQQG99qPypvYJpqqcBCrKAY",
+//   10: "BbnZ17N4Xsp2H57vexbuY1CfbttaysCL4Js3i68hChNf",
+//   20: "8a1qtqmbdsJaJnttQW298Jhny6DWzVw5BmDb1c7Ce36r",
+// };
 
 export const nftMetadata = [
   {

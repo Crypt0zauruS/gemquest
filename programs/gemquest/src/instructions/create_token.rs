@@ -16,6 +16,10 @@ pub fn create_token(
     token_uri: String,
 ) -> Result<()> {
 
+    if token_name.is_empty() || token_symbol.is_empty() || token_uri.is_empty() {
+        return Err(ErrorCode::InvalidInput.into());
+    }
+
     // Cross Program Invocation (CPI)
     // Invoking the create_metadata_account_v3 instruction on the token metadata program
     create_metadata_accounts_v3(
@@ -77,4 +81,11 @@ pub struct CreateToken<'info> {
     pub token_metadata_program: Program<'info, Metadata>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
+}
+
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Invalid input provided.")]
+    InvalidInput,
 }
