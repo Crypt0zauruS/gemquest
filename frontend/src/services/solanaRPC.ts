@@ -524,7 +524,10 @@ export default class SolanaRpc {
 
       const metadataMap: { [key: string]: any } = {};
       metadata.forEach((nft) => {
-        metadataMap[nft.symbol] = nft.metadata;
+        metadataMap[nft.symbol] = {
+          metadata: nft.metadata,
+          address: nft.address,
+        };
       });
 
       return metadataMap;
