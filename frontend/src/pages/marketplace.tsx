@@ -195,7 +195,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
         progress: undefined,
       });
       await rpc.burnTokenTransferNFT(
-        "813dVg8m1PWcD3oyR2VtGXGjGd1BePVvEGDLqyYfq8SN",
+        address,
         selectedNft?.metadata?.properties?.gem_cost
       );
       toast.dismiss();
@@ -424,14 +424,13 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                           ipfsGateway
                         )}
                         alt={nftMetadata[key]?.metadata?.name}
-                        className={`rewardImage ${
-                          nftMetadata[key]?.metadata?.properties?.gem_cost &&
+                        className={`rewardImage ${nftMetadata[key]?.metadata?.properties?.gem_cost &&
                           Number(
                             nftMetadata[key]?.metadata?.properties?.gem_cost
                           ) <= totalGems
-                            ? "green"
-                            : "red"
-                        }`}
+                          ? "green"
+                          : "red"
+                          }`}
                       />
                       <h3>{nftMetadata[key]?.metadata?.name}</h3>
                       {nftByUser[nftMetadata[key]?.metadata?.symbol] > 0 && (
@@ -496,7 +495,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                     disabled={
                       loader ||
                       totalGems <
-                        Number(selectedNft?.metadata?.properties?.gem_cost)
+                      Number(selectedNft?.metadata?.properties?.gem_cost)
                     }
                     onClick={() => handleBuyNFT(selectedNft?.address)}
                   >
