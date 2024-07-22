@@ -28,7 +28,7 @@ Le back-end de GemQuest est construit sur la blockchain **Solana** et utilise le
 - **Solana Blockchain** : Fournit une infrastructure rapide et à faible coût pour les transactions décentralisées.
 - **Anchor Framework** : Simplifie le développement de programme sur Solana en fournissant des outils et des abstractions de haut niveau.
 
-### Front-End 🔗 : [`Link Here`](https://github.com/Crypt0zauruS/gemquest/frontend)
+### Front-End 🔗 : [`Link Here`](https://github.com/Crypt0zauruS/gemquest/tree/master/frontend)
 
 Le front-end de GemQuest est développé avec **React** et **Next.js**. Il utilise les librairie **Web3Auth** pet l'api **OpenAi** offrant une interface utilisateur réactive et optimisée pour une performance élevée :
 
