@@ -406,7 +406,6 @@ describe("***** GemQuest Unit TESTS ******", () => {
         //     }
         // });
 
-        let tokenBalanceBeforeMintNft: number;
         it('- should create 10 new NFTs in Admin wallet', async () => {
 
             const nftAmountToMint = 10;
@@ -468,7 +467,14 @@ describe("***** GemQuest Unit TESTS ******", () => {
             expect(nftAccountInfoAfter.amount.toString()).to.equal((nftAmountBefore + nftAmountToMint).toString());
         });
 
+        let tokenBalanceBeforeMintNft: number;
+
         it('- should send 1 NFT to the user wallet', async () => {
+
+            tokenBalanceBeforeMintNft = (
+                await program.provider.connection.getTokenAccountBalance(userTokenATA.address)
+            ).value.uiAmount;
+
 
             const adminNftATA = getAssociatedTokenAddressSync(MINT_NFT_ACCOUNT.publicKey, ADMIN.publicKey);
             const adminNFTAccount = await getAccount(program.provider.connection, adminNftATA);
@@ -494,12 +500,16 @@ describe("***** GemQuest Unit TESTS ******", () => {
 
 
             await program.methods
-                .burnTokenTransferNft()
+                .burnTokenTransferNft(new BN(NFT_PRICE))
                 .accounts({
-                    fromAuthority: ADMIN.publicKey,
+
+                    associatedTokenAccount: userTokenATA.address,
+                    mintTokenAccount: MINT_TOKEN_ACCOUNT.publicKey,
 
                     from: adminNftATA,
                     to: userNftATA.address,
+
+                    fromAuthority: ADMIN.publicKey,
 
                     // system
                     tokenProgram: TOKEN_PROGRAM_ID,
@@ -515,15 +525,15 @@ describe("***** GemQuest Unit TESTS ******", () => {
 
         });
 
-        // it('- should burn the right amount of a token', async () => {
+        it('- should burn the right amount of a token after transfering NFT', async () => {
 
-        //     const tokenBalanceAfterMintNFT = (
-        //         await program.provider.connection.getTokenAccountBalance(associatedTokenAccountAddress)
-        //     ).value.uiAmount;
+            const tokenBalanceAfterMintNFT = (
+                await program.provider.connection.getTokenAccountBalance(userTokenATA.address)
+            ).value.uiAmount;
 
-        //     expect(tokenBalanceAfterMintNFT.toString()).to.equal((tokenBalanceBeforeMintNft - (NFT_PRICE / web3.LAMPORTS_PER_SOL)).toString());
+            expect(tokenBalanceAfterMintNFT.toString()).to.equal((tokenBalanceBeforeMintNft - (NFT_PRICE / web3.LAMPORTS_PER_SOL)).toString());
 
-        // });
+        });
     });
 
 });

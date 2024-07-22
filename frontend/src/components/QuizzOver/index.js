@@ -132,7 +132,7 @@ const QuizzOver = forwardRef((props, ref) => {
               💎 Mint Your Gems ! 💎
             </button>
             <p className="progressPercent" style={{ marginTop: "10px" }}>
-              Gems earned: {gemsEarned} 💍
+              Gems earned: {gemsEarned} 💎
             </p>
           </div>
         )}

@@ -152,12 +152,20 @@ export const nftMetadata = [
     metadataAccount: "BWKYC9VW958kBhsrPxcqbPHpPCw41XCq42nhkhx1o2cU",
     uri: "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQFD.json",
   },
+  // {
+  //   name: "Free Snack",
+  //   symbol: "GQFS",
+  //   address: "DPSkb1ugFgUhZCkJswcB9aMbD85PC3JZ7gBd6unUiGG9",
+  //   ATA: "BxSgMkMW9u8uUQGjNVwVSEJcEvppuCAJg551csAYQmEL",
+  //   metadataAccount: "7MwXtgAnkR82pkDHnuWZo51CzWiSzeZfgDz1uE8FBxCi",
+  //   uri: "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQFS.json",
+  // },
   {
     name: "Free Snack",
     symbol: "GQFS",
-    address: "DPSkb1ugFgUhZCkJswcB9aMbD85PC3JZ7gBd6unUiGG9",
-    ATA: "BxSgMkMW9u8uUQGjNVwVSEJcEvppuCAJg551csAYQmEL",
-    metadataAccount: "7MwXtgAnkR82pkDHnuWZo51CzWiSzeZfgDz1uE8FBxCi",
+    address: "C1H76Vh5bjPZLe4tpnCmwaLyHWmg1JDTApLSzG6zSFy7",
+    ATA: "6jpaYcBKXLtm8dDLBGN5pHVw5oK84urnw5pHVkBKhTLu",
+    metadataAccount: "CGNYPtC3ryoT48psJk2aCEAV3EfvyainjzQNAUNpjPRP",
     uri: "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQFS.json",
   },
   {

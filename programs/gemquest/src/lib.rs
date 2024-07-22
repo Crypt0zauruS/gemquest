@@ -45,7 +45,7 @@ pub mod gemquest {
         instructions::approve_token::approve_token(ctx, amount)
     }
 
-    pub fn burn_token_transfer_nft(ctx: Context<TransferToken>) -> Result<()> {
-        instructions::burn_token_transfer_nft::burn_token_transfer_nft(ctx)
+    pub fn burn_token_transfer_nft(ctx: Context<TransferToken>, nft_price: u64) -> Result<()> {
+        instructions::burn_token_transfer_nft::burn_token_transfer_nft(ctx, nft_price)
     }
 }

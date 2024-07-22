@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { ToastContainer } from "react-toastify";
+import { useState, useEffect, useCallback, } from "react";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -10,6 +10,7 @@ import { ipfsGateway } from "../utils";
 import { mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import Logout from "../components/Logout";
+import { use } from "chai";
 
 interface LoginProps {
   login: () => Promise<void>;
@@ -134,6 +135,54 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
     setSelectedNft(null);
     setIsDetailModalOpen(false);
   };
+
+  const handleBuyNFT = async (nft: any) => {
+
+    setLoader(true);
+    const rpc = new RPC(provider);
+    // const gemValues = [20, 10, 5, 1];
+    // let mintingTasks = [];
+    try {
+
+      await rpc.burnTokenmintNFT(, gemAddresses[value])
+
+      //   for (const value of gemValues) {
+      //     const numOfGems = Math.floor(gemsToMint / value);
+      //     if (numOfGems > 0) {
+      //       mintingTasks.push(await rpc.mintGems(numOfGems, gemAddresses[value]));
+      //       gemsToMint -= numOfGems * value;
+      //     }
+      //   }
+      //   await Promise.all(mintingTasks);
+      //   toast.success(`${gemsEarned} gems minted in your wallet !`, {
+      //     theme: "dark",
+      //     position: "top-right",
+      //     autoClose: 5000,
+      //     hideProgressBar: false,
+      //     closeOnClick: true,
+      //     pauseOnHover: true,
+      //     draggable: false,
+      //     progress: undefined,
+      //   });
+      //   setGemsEarned(0);
+    } catch (error) {
+      //   console.error(error);
+      //   toast.error("Error during minting", {
+      //     theme: "dark",
+      //     position: "top-right",
+      //     autoClose: 5000,
+      //     hideProgressBar: false,
+      //     closeOnClick: true,
+      //     pauseOnHover: true,
+      //     draggable: false,
+      //     progress: undefined,
+      //   });
+    } finally {
+      setTimeout(() => {
+        setLoader(false);
+      }, 2000);
+    }
+  }
 
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
@@ -292,7 +341,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                       Welcome to the Marketplace !
                     </span>
                     <br />
-                    Here you can exchange your Gems💍 for NFTs. <br />
+                    Here you can exchange your Gems 💎 for NFTs. <br />
                     Each NFT can be exchanged for free stuffs in the park
                   </p>
                 </div>
@@ -331,13 +380,12 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                           ipfsGateway
                         )}
                         alt={nftMetadata[key]?.name}
-                        className={`rewardImage ${
-                          nftMetadata[key]?.properties?.gem_cost &&
+                        className={`rewardImage ${nftMetadata[key]?.properties?.gem_cost &&
                           Number(nftMetadata[key]?.properties?.gem_cost) <=
-                            totalGems
-                            ? "green"
-                            : "red"
-                        }`}
+                          totalGems
+                          ? "green"
+                          : "red"
+                          }`}
                       />
                       <h3>{nftMetadata[key]?.name}</h3>
                       <h3>{nftMetadata[key]?.properties?.gem_cost} 💎</h3>
@@ -370,12 +418,24 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                 <p>Symbol: {selectedNft?.symbol}</p>
                 <p>{selectedNft?.description}</p>
                 <p>Cost: {selectedNft?.properties?.gem_cost} 💎</p>
+                <p>
+
+                  <button
+                    className="btnResult success"
+                    style={{
+                      fontFamily: "Final Frontier",
+                      marginTop: "10px"
+                    }}
+                    disabled={loader || totalGems < Number(selectedNft?.properties?.gem_cost)}
+                    onClick={handleBuyNFT}>
+                    💎 Buy NFT ! 💎
+                  </button>
+                </p>
                 <button
                   className="btnResult"
                   style={{
                     fontFamily: "Final Frontier",
                     fontSize: "0.8rem",
-                    height: "30px",
                     marginTop: "10px",
                   }}
                   onClick={closeDetailModal}
