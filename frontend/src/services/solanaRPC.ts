@@ -16,6 +16,7 @@ import {
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,
+  getOrCreateAssociatedTokenAccount,
   unpackAccount,
 } from "@solana/spl-token";
 import bs58 from "bs58";
@@ -533,7 +534,8 @@ export default class SolanaRpc {
     }
   };
 
-  mintNFT = async (): Promise<string> => {
+  approveTokenBurn = async (nft_price: number): Promise<string> => {
+
     const solanaWallet = new SolanaWallet(this.provider);
     const users = await this.getAccounts();
     const userWallet = users[0];
@@ -554,61 +556,166 @@ export default class SolanaRpc {
     const program = new Program(idl as any, provider);
     setProvider(provider);
 
-    const metadata = {
-      name: 'Free Snack',
-      symbol: 'GQFS',
-      uri: 'https://fuchsia-varying-camel-696.mypinata.cloud/ipfs/bafybeibb5rh62yfijm7ypoaphsz4rzvf7wlvjucicafu5v3eq2aur3rv3a/GQFS.json',
-    };
-    const NFT_PRICE = 10 * web3.LAMPORTS_PER_SOL;
-
-    const TOKEN_METADATA_PROGRAM_ID = new PublicKey(tokenMetadataProgramId);
-
-    // const mintNftTokenAccount = new PublicKey(mintAddress);
-    const MINT_NFT_ACCOUNT = new Keypair();
-
-    const associatedNftTokenAccount = getAssociatedTokenAddressSync(
-      MINT_NFT_ACCOUNT.publicKey,
-      new PublicKey(userWallet)
-    );
-
-    const [metadataAccount] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from("metadata"),
-        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-        MINT_NFT_ACCOUNT.publicKey.toBuffer(),
-      ],
-      TOKEN_METADATA_PROGRAM_ID
-    );
-
-    const [editionAccount] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from("metadata"),
-        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-        MINT_NFT_ACCOUNT.publicKey.toBuffer(),
-        Buffer.from("edition"),
-      ],
-      TOKEN_METADATA_PROGRAM_ID
-    );
+    const NFT_PRICE = nft_price * web3.LAMPORTS_PER_SOL;
+    console.log("NFT_PRICE", NFT_PRICE);
 
     const MINT_TOKEN_ACCOUNT = new PublicKey(gemAddresses[1]);
 
-    const associatedTokenAccount = getAssociatedTokenAddressSync(
+    // const userTokenATA = getAssociatedTokenAddressSync(
+    //   MINT_TOKEN_ACCOUNT,
+    //   new PublicKey(userWallet)
+    // );
+
+    const userTokenATA = await getOrCreateAssociatedTokenAccount(
+      program.provider.connection,
+      adminWallet, // Payer
       MINT_TOKEN_ACCOUNT,
       new PublicKey(userWallet)
     );
 
+    // Give allowance to admin to burn user token
+    const instructionApproveToken = await program.instruction
+      .approveToken(new BN(NFT_PRICE),
+        {
+          accounts: {
+
+            associatedTokenAccount: userTokenATA.address,
+
+            delegate: adminWallet.publicKey,
+            authority: userWallet,
+
+            // system
+            tokenProgram: TOKEN_PROGRAM_ID,
+          }
+        });
+
+
+    const latestBlockhashInfo = await conn.getLatestBlockhash("finalized");
+
+    const transactionApprove = new Transaction({
+      blockhash: latestBlockhashInfo.blockhash,
+      feePayer: new PublicKey(userWallet),
+      lastValidBlockHeight: latestBlockhashInfo.lastValidBlockHeight,
+    }).add(instructionApproveToken);
+
+
+    // Using web3auth wallet to sign the transaction
+    const signedTx = await solanaWallet.signAndSendTransaction(transactionApprove);
+
+    console.log("Approve Token Transaction confirmed:", signedTx);
+
+    const accountInfo = await program.provider.connection.getAccountInfo(userTokenATA.address);
+    const uAccount = unpackAccount(userTokenATA.address, accountInfo, TOKEN_PROGRAM_ID);
+
+    console.log("Token delegated of user wallet:", uAccount.delegatedAmount.toString());
+
+    return signedTx?.signature;
+  };
+
+
+  checkApproveToken = async (): Promise<void> => {
+
+    const solanaWallet = new SolanaWallet(this.provider);
+    const users = await this.getAccounts();
+    const userWallet = users[0];
+    const connectionConfig = {
+      rpcTarget: "https://api.devnet.solana.com",
+    };
+    const conn = new Connection(connectionConfig.rpcTarget);
+    // Récupérez la clé privée de l'API
+    const response = await fetch("/api/getKey", { method: "POST" });
+    const data = await response.json();
+    // Décodez la clé privée de adminWallet
+    const adminWalletSecretKey = bs58.decode(data.privateKey);
+    const adminWallet = Keypair.fromSecretKey(adminWalletSecretKey);
+
+    const provider = new AnchorProvider(conn, adminWallet as any, {
+      preflightCommitment: "finalized",
+    });
+    const program = new Program(idl as any, provider);
+    setProvider(provider);
+
+    const MINT_TOKEN_ACCOUNT = new PublicKey(gemAddresses[1]);
+    const userTokenATA = await getOrCreateAssociatedTokenAccount(
+      program.provider.connection,
+      adminWallet, // Payer
+      MINT_TOKEN_ACCOUNT,
+      new PublicKey(userWallet)
+    );
+
+    const accountInfo = await program.provider.connection.getAccountInfo(userTokenATA.address);
+    const uAccount = unpackAccount(userTokenATA.address, accountInfo, TOKEN_PROGRAM_ID);
+
+    console.log("Token delegated of user wallet:", uAccount.delegatedAmount.toString());
+  };
+
+  burnTokenTransferNFTd = async (nftTokenAddr: string, nft_price: number): Promise<string> => {
+    const solanaWallet = new SolanaWallet(this.provider);
+    const users = await this.getAccounts();
+    const userWallet = users[0];
+    const connectionConfig = {
+      rpcTarget: "https://api.devnet.solana.com",
+    };
+    const conn = new Connection(connectionConfig.rpcTarget);
+    // Récupérez la clé privée de l'API
+    const response = await fetch("/api/getKey", { method: "POST" });
+    const data = await response.json();
+    // Décodez la clé privée de adminWallet
+    const adminWalletSecretKey = bs58.decode(data.privateKey);
+    const adminWallet = Keypair.fromSecretKey(adminWalletSecretKey);
+
+    const provider = new AnchorProvider(conn, adminWallet as any, {
+      preflightCommitment: "finalized",
+    });
+    const program = new Program(idl as any, provider);
+    setProvider(provider);
+
+
+    const NFT_PRICE = nft_price * web3.LAMPORTS_PER_SOL;
+    console.log("NFT_PRICE", NFT_PRICE);
+
+    const MINT_NFT_ACCOUNT = new PublicKey(nftTokenAddr);
+
+    // const userNftATA = getAssociatedTokenAddressSync(
+    //   MINT_NFT_ACCOUNT,
+    //   new PublicKey(userWallet)
+    // );
+
+    const userNftATA = await getOrCreateAssociatedTokenAccount(
+      program.provider.connection,
+      adminWallet, // Payer
+      MINT_NFT_ACCOUNT,
+      new PublicKey(userWallet)
+    );
+
+    const MINT_TOKEN_ACCOUNT = new PublicKey(gemAddresses[1]);
+
+    // const userTokenATA = getAssociatedTokenAddressSync(
+    //   MINT_TOKEN_ACCOUNT,
+    //   new PublicKey(userWallet)
+    // );
+
+    const userTokenATA = await getOrCreateAssociatedTokenAccount(
+      program.provider.connection,
+      adminWallet, // Payer
+      MINT_TOKEN_ACCOUNT,
+      new PublicKey(userWallet)
+    );
+
+    const adminNftATA = getAssociatedTokenAddressSync(
+      MINT_NFT_ACCOUNT,
+      adminWallet.publicKey
+    );
 
     console.table({
       programId: program.programId.toBase58(),
-      tokenMetadataProgramId: TOKEN_METADATA_PROGRAM_ID.toBase58(),
       userWallet: userWallet,
       signer: adminWallet.publicKey.toBase58(),
-      mintNftAccount: MINT_NFT_ACCOUNT.publicKey.toBase58(),
-      associatedNftTokenAccount: associatedNftTokenAccount.toBase58(),
+      mintNftAccount: MINT_NFT_ACCOUNT.toBase58(),
+      userNftATA: userNftATA.address.toBase58(),
       mintTokenAccount: MINT_TOKEN_ACCOUNT.toBase58(),
-      associatedTokenAccount: associatedTokenAccount.toBase58(),
-      metadataAccount: metadataAccount.toBase58(),
-      editionAccount: editionAccount.toBase58(),
+      userTokenATA: userTokenATA.address.toBase58(),
+      adminNftATA: adminNftATA.toBase58(),
     });
 
     // Give allowance to admin to burn user token
@@ -617,7 +724,7 @@ export default class SolanaRpc {
         {
           accounts: {
 
-            associatedTokenAccount: associatedTokenAccount,
+            associatedTokenAccount: userTokenATA.address,
 
             delegate: adminWallet.publicKey,
             authority: userWallet,
@@ -629,62 +736,170 @@ export default class SolanaRpc {
 
 
     // User need to sign the approve transaction
-    const recentBlockhash = await conn.getRecentBlockhash("finalized");
+    // const recentBlockhash = await conn.getRecentBlockhash("finalized");
+
+    // const transactionApprove = new Transaction({
+    //   recentBlockhash: recentBlockhash.blockhash,
+    //   feePayer: new PublicKey(userWallet),
+    // }).add(instructionApproveToken);
+
+
+    const latestBlockhashInfo = await conn.getLatestBlockhash("finalized");
 
     const transactionApprove = new Transaction({
-      recentBlockhash: recentBlockhash.blockhash,
+      blockhash: latestBlockhashInfo.blockhash,
+      //   // recentBlockhash: blockhash,
       feePayer: new PublicKey(userWallet),
+      lastValidBlockHeight: latestBlockhashInfo.lastValidBlockHeight,
     }).add(instructionApproveToken);
+
 
     // Using web3auth wallet to sign the transaction
     const signedTx = await solanaWallet.signAndSendTransaction(transactionApprove);
 
     console.log("Approve Token Transaction confirmed:", signedTx);
 
+    const accountInfo = await program.provider.connection.getAccountInfo(userTokenATA.address);
+    const uAccount = unpackAccount(userTokenATA.address, accountInfo, TOKEN_PROGRAM_ID);
 
-    const accountInfo = await program.provider.connection.getAccountInfo(associatedTokenAccount);
-    const uAccount = unpackAccount(associatedTokenAccount, accountInfo, TOKEN_PROGRAM_ID);
-
-    console.log(uAccount.delegatedAmount.toString());
+    console.log("Token delegated of user wallet:", uAccount.delegatedAmount.toString());
 
 
     // Burn and mint NFT
-    const instructionCreateNFT = program.instruction.createNft(metadata.name, metadata.symbol, metadata.uri, new BN(NFT_PRICE), {
+    const instructionBurnTransfer = program.instruction.burnTokenTransferNft(new BN(NFT_PRICE), {
       accounts: {
         payer: adminWallet.publicKey,
 
         mintTokenAccount: MINT_TOKEN_ACCOUNT,
-        associatedTokenAccount: associatedTokenAccount,
+        associatedTokenAccount: userTokenATA.address,
 
-        metadataAccount: metadataAccount,
-        editionAccount: editionAccount,
+        from: adminNftATA,
+        to: userNftATA.address,
 
-        mintNftAccount: MINT_NFT_ACCOUNT.publicKey,
-        associatedNftTokenAccount: associatedNftTokenAccount,
-
-        user: new PublicKey(userWallet),
+        fromAuthority: adminWallet.publicKey,
 
         // system
         tokenProgram: TOKEN_PROGRAM_ID,
-        tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-        systemProgram: web3.SystemProgram.programId,
-        rent: web3.SYSVAR_RENT_PUBKEY,
       },
     });
 
-    const { blockhash } = await conn.getRecentBlockhash("finalized");
+    const blockhashInfo = await conn.getLatestBlockhash("finalized");
 
     const transaction = new Transaction({
-      recentBlockhash: blockhash,
+      blockhash: blockhashInfo.blockhash,
+      // recentBlockhash: blockhash,
+      lastValidBlockHeight: blockhashInfo.lastValidBlockHeight,
       feePayer: adminWallet.publicKey,
-    }).add(instructionCreateNFT);
+    }).add(instructionBurnTransfer);
 
     const signature = await sendAndConfirmTransaction(conn, transaction, [
-      adminWallet, MINT_NFT_ACCOUNT
+      adminWallet
     ]);
     console.log("Mint NFT Transaction confirmed:", signature);
     return signature;
-    return '';
+  };
+
+
+  burnTokenTransferNFT = async (nftTokenAddr: string, nft_price: number): Promise<string> => {
+    const solanaWallet = new SolanaWallet(this.provider);
+    const users = await this.getAccounts();
+    const userWallet = users[0];
+    const connectionConfig = {
+      rpcTarget: "https://api.devnet.solana.com",
+    };
+    const conn = new Connection(connectionConfig.rpcTarget);
+    // Récupérez la clé privée de l'API
+    const response = await fetch("/api/getKey", { method: "POST" });
+    const data = await response.json();
+    // Décodez la clé privée de adminWallet
+    const adminWalletSecretKey = bs58.decode(data.privateKey);
+    const adminWallet = Keypair.fromSecretKey(adminWalletSecretKey);
+
+    const provider = new AnchorProvider(conn, adminWallet as any, {
+      preflightCommitment: "finalized",
+    });
+    const program = new Program(idl as any, provider);
+    setProvider(provider);
+
+
+    const NFT_PRICE = nft_price * web3.LAMPORTS_PER_SOL;
+    console.log("NFT_PRICE", NFT_PRICE);
+
+    const MINT_NFT_ACCOUNT = new PublicKey(nftTokenAddr);
+
+    // const userNftATA = getAssociatedTokenAddressSync(
+    //   MINT_NFT_ACCOUNT,
+    //   new PublicKey(userWallet)
+    // );
+
+    const userNftATA = await getOrCreateAssociatedTokenAccount(
+      program.provider.connection,
+      adminWallet, // Payer
+      MINT_NFT_ACCOUNT,
+      new PublicKey(userWallet)
+    );
+
+    const MINT_TOKEN_ACCOUNT = new PublicKey(gemAddresses[1]);
+
+    // const userTokenATA = getAssociatedTokenAddressSync(
+    //   MINT_TOKEN_ACCOUNT,
+    //   new PublicKey(userWallet)
+    // );
+
+    const userTokenATA = await getOrCreateAssociatedTokenAccount(
+      program.provider.connection,
+      adminWallet, // Payer
+      MINT_TOKEN_ACCOUNT,
+      new PublicKey(userWallet)
+    );
+
+    const adminNftATA = getAssociatedTokenAddressSync(
+      MINT_NFT_ACCOUNT,
+      adminWallet.publicKey
+    );
+
+    console.table({
+      programId: program.programId.toBase58(),
+      userWallet: userWallet,
+      signer: adminWallet.publicKey.toBase58(),
+      mintNftAccount: MINT_NFT_ACCOUNT.toBase58(),
+      userNftATA: userNftATA.address.toBase58(),
+      mintTokenAccount: MINT_TOKEN_ACCOUNT.toBase58(),
+      userTokenATA: userTokenATA.address.toBase58(),
+      adminNftATA: adminNftATA.toBase58(),
+    });
+
+
+    // Burn and mint NFT
+    const instructionBurnTransfer = program.instruction.burnTokenTransferNft(new BN(NFT_PRICE), {
+      accounts: {
+        payer: adminWallet.publicKey,
+
+        mintTokenAccount: MINT_TOKEN_ACCOUNT,
+        associatedTokenAccount: userTokenATA.address,
+
+        from: adminNftATA,
+        to: userNftATA.address,
+
+        fromAuthority: adminWallet.publicKey,
+
+        // system
+        tokenProgram: TOKEN_PROGRAM_ID,
+      },
+    });
+
+    const blockhashInfo = await conn.getLatestBlockhash("finalized");
+
+    const transaction = new Transaction({
+      blockhash: blockhashInfo.blockhash,
+      lastValidBlockHeight: blockhashInfo.lastValidBlockHeight,
+      feePayer: adminWallet.publicKey,
+    }).add(instructionBurnTransfer);
+
+    const signature = await sendAndConfirmTransaction(conn, transaction, [
+      adminWallet
+    ]);
+    console.log("Mint NFT Transaction confirmed:", signature);
+    return signature;
   };
 }

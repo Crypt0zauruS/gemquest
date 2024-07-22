@@ -11,7 +11,7 @@ gemquest = "4MUuZnYgakTqerEBjsD783s4QP2trwyy2KWZ9SXJdffZ"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "http://127.0.0.1:8899"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

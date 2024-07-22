@@ -1,5 +1,5 @@
 {
-  "address": "ADt9txqiwPM79q7XA15shypjVrKcGPQHNdAZvV8YZA48",
+  "address": "4MUuZnYgakTqerEBjsD783s4QP2trwyy2KWZ9SXJdffZ",
   "metadata": {
     "name": "gemquest",
     "version": "0.1.0",
@@ -44,6 +44,51 @@
       ]
     },
     {
+      "name": "burn_token_transfer_nft",
+      "discriminator": [
+        52,
+        239,
+        100,
+        194,
+        65,
+        251,
+        171,
+        35
+      ],
+      "accounts": [
+        {
+          "name": "associated_token_account",
+          "writable": true
+        },
+        {
+          "name": "mint_token_account",
+          "writable": true
+        },
+        {
+          "name": "from",
+          "writable": true
+        },
+        {
+          "name": "to",
+          "writable": true
+        },
+        {
+          "name": "from_authority",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "nft_price",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "create_nft",
       "discriminator": [
         231,
@@ -60,14 +105,6 @@
           "name": "payer",
           "writable": true,
           "signer": true
-        },
-        {
-          "name": "associated_token_account",
-          "writable": true
-        },
-        {
-          "name": "mint_token_account",
-          "writable": true
         },
         {
           "name": "metadata_account",
@@ -159,7 +196,7 @@
             "seeds": [
               {
                 "kind": "account",
-                "path": "user"
+                "path": "payer"
               },
               {
                 "kind": "const",
@@ -243,10 +280,6 @@
           }
         },
         {
-          "name": "user",
-          "writable": true
-        },
-        {
           "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
@@ -281,7 +314,7 @@
           "type": "string"
         },
         {
-          "name": "nft_price",
+          "name": "amount",
           "type": "u64"
         }
       ]
@@ -653,23 +686,13 @@
   "errors": [
     {
       "code": 6000,
-      "name": "InvalidInput",
-      "msg": "Invalid input provided."
+      "name": "UnauthorizedMinting",
+      "msg": "Unauthorized minting attempt."
     },
     {
       "code": 6001,
-      "name": "InvalidPrice",
-      "msg": "Invalid price provided."
-    },
-    {
-      "code": 6002,
-      "name": "InsufficientBalance",
-      "msg": "Insufficient balance."
-    },
-    {
-      "code": 6003,
-      "name": "Unauthorized",
-      "msg": "Unauthorized access."
+      "name": "InvalidMintAmount",
+      "msg": "Mint amount must not be equal to 0."
     }
   ],
   "types": [

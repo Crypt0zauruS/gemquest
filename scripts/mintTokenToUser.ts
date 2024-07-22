@@ -16,19 +16,23 @@ import { clusterApiUrl, PublicKey, Connection, Keypair } from "@solana/web3.js";
 import bs58 from "bs58";
 import "dotenv/config";
 
-const METADATA_SEED = Buffer.from("metadata");
-const TOKEN_METADATA_PROGRAM_ID = new PublicKey(
-    "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
-);
+import {
+    gemAddresses,
+    gemMetadataAccounts,
+    nftMetadata,
+    ipfsGateway,
+    tokenMetadataProgramId
+} from "../frontend/src/utils";
+
+
 
 let wallet: any;
 let program: Program;
 let provider: AnchorProvider;
-// GEM TOKEN 
-// const mintTokenAccount = new PublicKey("tbvf6yzmE1R9tDuURQBVELZk2ZvTgyw2jviGUhhuXEe");
 
-// NFT FREE SNACK ACCOUNT
-const mintTokenAccount = new PublicKey("C1H76Vh5bjPZLe4tpnCmwaLyHWmg1JDTApLSzG6zSFy7");
+// GEM TOKEN 
+const mintTokenAccount = new PublicKey("tbvf6yzmE1R9tDuURQBVELZk2ZvTgyw2jviGUhhuXEe");
+
 
 async function main() {
     const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
@@ -49,11 +53,7 @@ async function main() {
     program = new Program(idl, provider);
     console.log("Program ID:", program.programId.toBase58());
 
-    // SEND TOKEN
-    // await MintTokenToUser(provider.wallet.publicKey, 1000);
-
-    // SEND NFT
-    await MintTokenToUser(new PublicKey("2PJvDq1EtUovedBc2xcc7FHyZP7AJeuru8D3bhmXm5cZ"), 1);
+    await MintTokenToUser(provider.wallet.publicKey, 1000);
 }
 
 

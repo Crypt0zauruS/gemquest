@@ -11,6 +11,7 @@ import { mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import Logout from "../components/Logout";
 import { use } from "chai";
+import { GiConsoleController } from "react-icons/gi";
 
 interface LoginProps {
   login: () => Promise<void>;
@@ -20,6 +21,7 @@ interface LoginProps {
 }
 
 interface Nft {
+  // address: string;
   name: string;
   image: string;
   symbol?: string;
@@ -94,6 +96,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
       setTotalGems(
         gems.gem1 * 1 + gems.gem5 * 5 + gems.gem10 * 10 + gems.gem20 * 20
       );
+      console.log(nftMetadata);
       setNftMetadata(nftMetadata);
       setGemsMetadata(gemsMetadata);
       console.table({ gems, nftMetadata, gemsMetadata });
@@ -127,6 +130,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
   };
 
   const openDetailModal = (nft: any) => {
+    console.log(nft);
     setSelectedNft(nft);
     setIsDetailModalOpen(true);
   };
@@ -138,45 +142,83 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
 
   const handleBuyNFT = async (nft: any) => {
 
-    setLoader(true);
-    const rpc = new RPC(provider);
-    // const gemValues = [20, 10, 5, 1];
-    // let mintingTasks = [];
     try {
+      setLoader(true);
+      const rpc = new RPC(provider);
 
-      await rpc.burnTokenmintNFT(, gemAddresses[value])
 
-      //   for (const value of gemValues) {
-      //     const numOfGems = Math.floor(gemsToMint / value);
-      //     if (numOfGems > 0) {
-      //       mintingTasks.push(await rpc.mintGems(numOfGems, gemAddresses[value]));
-      //       gemsToMint -= numOfGems * value;
-      //     }
-      //   }
-      //   await Promise.all(mintingTasks);
-      //   toast.success(`${gemsEarned} gems minted in your wallet !`, {
-      //     theme: "dark",
-      //     position: "top-right",
-      //     autoClose: 5000,
-      //     hideProgressBar: false,
-      //     closeOnClick: true,
-      //     pauseOnHover: true,
-      //     draggable: false,
-      //     progress: undefined,
-      //   });
-      //   setGemsEarned(0);
+
+      // const nft = Object.keys(nftMetadata).find(nft => nft.symbol == selectedNft?.symbol
+      // );
+      // console.log(nftMetadata[2]);
+      // nftMetadata.find((nft: any) => {
+      // );
+      console.log(selectedNft);
+      toast.loading(`Approve burning GEMS Tokens ...`, {
+        theme: "dark",
+        position: "top-right",
+        autoClose: 10000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        progress: undefined,
+      });
+      const tx = await rpc.approveTokenBurn(selectedNft?.properties?.gem_cost);
+      toast.dismiss();
+      toast.success(`Burn GEMS tokens approved ! \n`, {
+        theme: "dark",
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        progress: undefined,
+      });
+
+      // TODO: Investigate, the TX is finalized but the token allowance is not updated
+      // We need to wait a little
+      // await new Promise(resolve => setTimeout(resolve, 5000));
+      // await rpc.checkApproveToken();
+      // await new Promise(resolve => setTimeout(resolve, 5000));
+      // await rpc.checkApproveToken();
+
+
+      toast.loading(`Minting ${selectedNft?.name} NFT ...`, {
+        theme: "dark",
+        position: "top-right",
+        autoClose: 10000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        progress: undefined,
+      });
+      await rpc.burnTokenTransferNFT("813dVg8m1PWcD3oyR2VtGXGjGd1BePVvEGDLqyYfq8SN", selectedNft?.properties?.gem_cost)
+      toast.dismiss();
+      toast.success(`NFT ! ${selectedNft?.name} minterd \n`, {
+        theme: "dark",
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        progress: undefined,
+      });
     } catch (error) {
-      //   console.error(error);
-      //   toast.error("Error during minting", {
-      //     theme: "dark",
-      //     position: "top-right",
-      //     autoClose: 5000,
-      //     hideProgressBar: false,
-      //     closeOnClick: true,
-      //     pauseOnHover: true,
-      //     draggable: false,
-      //     progress: undefined,
-      //   });
+      console.error(error);
+      toast.error("Error during NFT minting", {
+        theme: "dark",
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        progress: undefined,
+      });
     } finally {
       setTimeout(() => {
         setLoader(false);

@@ -163,9 +163,9 @@ export const nftMetadata = [
   {
     name: "Free Snack",
     symbol: "GQFS",
-    address: "C1H76Vh5bjPZLe4tpnCmwaLyHWmg1JDTApLSzG6zSFy7",
-    ATA: "6jpaYcBKXLtm8dDLBGN5pHVw5oK84urnw5pHVkBKhTLu",
-    metadataAccount: "CGNYPtC3ryoT48psJk2aCEAV3EfvyainjzQNAUNpjPRP",
+    address: "813dVg8m1PWcD3oyR2VtGXGjGd1BePVvEGDLqyYfq8SN",
+    ATA: "62LFVb5x2nnuzcBHtVBLwju4mF1TUmaCfA88oJiJQRdT",
+    metadataAccount: "8SMNVs8LzzTzd5wqQSfrLGRQpDrDU3pAA6s1uWNQPdpy",
     uri: "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQFS.json",
   },
   {

@@ -503,8 +503,8 @@ describe("***** GemQuest Unit TESTS ******", () => {
                 .burnTokenTransferNft(new BN(NFT_PRICE))
                 .accounts({
 
-                    associatedTokenAccount: userTokenATA.address,
                     mintTokenAccount: MINT_TOKEN_ACCOUNT.publicKey,
+                    associatedTokenAccount: userTokenATA.address,
 
                     from: adminNftATA,
                     to: userNftATA.address,

@@ -60,7 +60,6 @@ async function main() {
       name: fetched.name,
       symbol: fetched.symbol,
       uri: ipfsUrl,
-      nft_price: fetched.properties.gem_cost,
     };
   }
 
@@ -68,13 +67,14 @@ async function main() {
     "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQFS.json"
   );
 
-  await CreateNFT(metadata);
+  const amount = 10;
+  await CreateNFT(metadata, amount);
 }
 
 /**
  * Create a new NFT with metadata
  */
-async function CreateNFT(metadata: any) {
+async function CreateNFT(metadata: any, amount: number) {
 
   // Generate a new keypair for the mint
   const mintNftTokenAccount = new Keypair();
@@ -85,11 +85,6 @@ async function CreateNFT(metadata: any) {
     wallet.publicKey
   );
 
-  const mintTokenAccount = new PublicKey("tbvf6yzmE1R9tDuURQBVELZk2ZvTgyw2jviGUhhuXEe");
-  const associatedTokenAccount = getAssociatedTokenAddressSync(
-    mintTokenAccount,
-    wallet.publicKey
-  );
   const [metadataAccount] = await PublicKey.findProgramAddress(
     [
       Buffer.from(SEED_METADATA),
@@ -110,20 +105,15 @@ async function CreateNFT(metadata: any) {
   );
 
   await program.methods
-    .createNft(metadata.name, metadata.symbol, metadata.uri, new BN(metadata.nft_price * LAMPORTS_PER_SOL))
+    .createNft(metadata.name, metadata.symbol, metadata.uri, new BN(amount))
     .accounts({
       payer: wallet.publicKey,
-
-      associatedTokenAccount: associatedTokenAccount,
-      mintTokenAccount: mintTokenAccount,
 
       metadataAccount: metadataAccount,
       editionAccount: editionAccount,
 
       mintNftAccount: mintNftTokenAccount.publicKey,
       associatedNftTokenAccount: associatedNftTokenAccountAddress,
-
-      user: wallet.publicKey,
 
       tokenProgram: TOKEN_PROGRAM_ID,
       tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
