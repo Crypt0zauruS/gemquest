@@ -13,9 +13,7 @@ export const useAuth = () => {
       console.log("Initializing AuthService");;
       const response = await fetch("/api/web3auth");
       const data = await response.json();
-      // const clientId = data.clientId;
-
-      const clientId = "BIqllUCddxz1syDZrl3tKQEH4MnwjHkL-HcrXYCb_zakRQU8UwcLjsPRiYw81aNN42qhLQ3uLcJ90BxX_g1khGY"!;
+      const clientId = data.clientId;
       console.log("Web3Auth client ID:", clientId);
       const web3auth = await getWeb3AuthInstance(clientId);
       const authServiceInstance = new AuthService(web3auth);
