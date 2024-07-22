@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
-import { Program, web3 } from "@coral-xyz/anchor";
+import { Program, web3, BN } from "@coral-xyz/anchor";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
-import { clusterApiUrl, PublicKey, Connection, Keypair } from "@solana/web3.js";
+import { clusterApiUrl, PublicKey, Connection, Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import {
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -9,6 +9,7 @@ import {
 
 import bs58 from "bs58";
 import "dotenv/config";
+import { publicKey } from "@metaplex-foundation/umi/serializers";
 
 const SEED_METADATA = "metadata";
 const SEED_EDITION = "edition";
@@ -52,17 +53,21 @@ async function main() {
     const fetched = (await response.json()) as {
       symbol: any;
       name: string;
+      properties: any;
     };
+    console.log(fetched);
     return {
       name: fetched.name,
       symbol: fetched.symbol,
       uri: ipfsUrl,
+      nft_price: fetched.properties.gem_cost,
     };
   }
 
   const metadata = await convertIpfsToHttp(
     "ipfs://QmQd5AC6BMf7RLZQubVZ7kqkFLeffPWwhsERLVj2wXMbEX/GQFS.json"
   );
+
   await CreateNFT(metadata);
 }
 
@@ -70,20 +75,26 @@ async function main() {
  * Create a new NFT with metadata
  */
 async function CreateNFT(metadata: any) {
+
   // Generate a new keypair for the mint
-  const mintAccount = new Keypair();
+  const mintNftTokenAccount = new Keypair();
 
   // Derive the associated token address account for the mint and payer.
   const associatedNftTokenAccountAddress = getAssociatedTokenAddressSync(
-    mintAccount.publicKey,
+    mintNftTokenAccount.publicKey,
     wallet.publicKey
   );
 
+  const mintTokenAccount = new PublicKey("tbvf6yzmE1R9tDuURQBVELZk2ZvTgyw2jviGUhhuXEe");
+  const associatedTokenAccount = getAssociatedTokenAddressSync(
+    mintTokenAccount,
+    wallet.publicKey
+  );
   const [metadataAccount] = await PublicKey.findProgramAddress(
     [
       Buffer.from(SEED_METADATA),
       TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-      mintAccount.publicKey.toBuffer(),
+      mintNftTokenAccount.publicKey.toBuffer(),
     ],
     TOKEN_METADATA_PROGRAM_ID
   );
@@ -92,21 +103,27 @@ async function CreateNFT(metadata: any) {
     [
       Buffer.from(SEED_METADATA),
       TOKEN_METADATA_PROGRAM_ID.toBuffer(),
-      mintAccount.publicKey.toBuffer(),
+      mintNftTokenAccount.publicKey.toBuffer(),
       Buffer.from(SEED_EDITION),
     ],
     TOKEN_METADATA_PROGRAM_ID
   );
 
   await program.methods
-    .createNft(metadata.name, metadata.symbol, metadata.uri)
+    .createNft(metadata.name, metadata.symbol, metadata.uri, new BN(metadata.nft_price * LAMPORTS_PER_SOL))
     .accounts({
       payer: wallet.publicKey,
-      associatedTokenAccount: associatedNftTokenAccountAddress,
-      mintAccount: mintAccount.publicKey,
+
+      associatedTokenAccount: associatedTokenAccount,
+      mintTokenAccount: mintTokenAccount,
 
       metadataAccount: metadataAccount,
       editionAccount: editionAccount,
+
+      mintNftAccount: mintNftTokenAccount.publicKey,
+      associatedNftTokenAccount: associatedNftTokenAccountAddress,
+
+      user: wallet.publicKey,
 
       tokenProgram: TOKEN_PROGRAM_ID,
       tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
@@ -114,11 +131,11 @@ async function CreateNFT(metadata: any) {
       systemProgram: web3.SystemProgram.programId,
       rent: web3.SYSVAR_RENT_PUBKEY,
     })
-    .signers([mintAccount])
+    .signers([mintNftTokenAccount])
     .rpc();
 
   console.log("NFTs created with metadata:", metadata);
-  console.log("NFT created at:", mintAccount.publicKey.toBase58());
+  console.log("NFT created at:", mintNftTokenAccount.publicKey.toBase58());
   console.log(
     "Associated Token Account:",
     associatedNftTokenAccountAddress.toBase58()

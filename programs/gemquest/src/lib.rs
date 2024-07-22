@@ -1,7 +1,6 @@
 
 use anchor_lang::prelude::*;
-// declare_id!("HAsE96RGMoeLahbUh8iQ7XF6NmGZyk5bbtoEkG4zE1F1");
-declare_id!("ADt9txqiwPM79q7XA15shypjVrKcGPQHNdAZvV8YZA48");
+declare_id!("4MUuZnYgakTqerEBjsD783s4QP2trwyy2KWZ9SXJdffZ");
 
 pub mod instructions;
 
@@ -37,12 +36,16 @@ pub mod gemquest {
         nft_name: String,
         nft_symbol: String,
         nft_uri: String,
-        nft_price: u64,
+        amount: u64,
     ) -> Result<()> {
-        instructions::create_nft::create_nft(ctx, nft_name, nft_symbol, nft_uri, nft_price)
+        instructions::create_nft::create_nft(ctx, nft_name, nft_symbol, nft_uri, amount)
     }
 
     pub fn approve_token(ctx: Context<ApproveToken>, amount: u64) -> Result<()> {
         instructions::approve_token::approve_token(ctx, amount)
+    }
+
+    pub fn burn_token_transfer_nft(ctx: Context<TransferToken>) -> Result<()> {
+        instructions::burn_token_transfer_nft::burn_token_transfer_nft(ctx)
     }
 }

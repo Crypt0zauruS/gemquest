@@ -16,32 +16,33 @@ pub fn create_nft(
     nft_name: String,
     nft_symbol: String,
     nft_uri: String,
-    nft_price: u64,
+    amount: u64,
+    // nft_price: u64,
 ) -> Result<()> {
 
     if nft_name.is_empty() || nft_symbol.is_empty() || nft_uri.is_empty() {
         return Err(ErrorCode::InvalidInput.into());
     }
 
-    // Nothing is free in this world
-    if nft_price == 0 {
-        return Err(ErrorCode::InvalidPrice.into());
-    }
+    // // Nothing is free in this world
+    // if nft_price == 0 {
+    //     return Err(ErrorCode::InvalidPrice.into());
+    // }
 
-    if ctx.accounts.associated_token_account.amount < nft_price {
-        return Err(ErrorCode::InsufficientBalance.into());
-    }
+    // if ctx.accounts.associated_token_account.amount < nft_price {
+    //     return Err(ErrorCode::InsufficientBalance.into());
+    // }
 
 
-    // Burn tokens before creating the NFT
-    let burn_cpi_accounts = Burn {
-        mint: ctx.accounts.mint_token_account.to_account_info(),
-        from: ctx.accounts.associated_token_account.to_account_info(),
-        authority: ctx.accounts.payer.to_account_info(),
-    };
-    let burn_cpi_program = ctx.accounts.token_program.to_account_info();
-    let burn_cpi_ctx = CpiContext::new(burn_cpi_program, burn_cpi_accounts);
-    burn(burn_cpi_ctx, nft_price)?;
+    // // Burn tokens before creating the NFT
+    // let burn_cpi_accounts = Burn {
+    //     mint: ctx.accounts.mint_token_account.to_account_info(),
+    //     from: ctx.accounts.associated_token_account.to_account_info(),
+    //     authority: ctx.accounts.payer.to_account_info(),
+    // };
+    // let burn_cpi_program = ctx.accounts.token_program.to_account_info();
+    // let burn_cpi_ctx = CpiContext::new(burn_cpi_program, burn_cpi_accounts);
+    // burn(burn_cpi_ctx, nft_price)?;
 
     // Cross Program Invocation (CPI)
     // Invoking the mint_to instruction on the token program
@@ -54,7 +55,7 @@ pub fn create_nft(
                 authority: ctx.accounts.payer.to_account_info(),
             },
         ),
-        1,
+        amount,
     )?;
 
     // Cross Program Invocation (CPI)
@@ -88,23 +89,23 @@ pub fn create_nft(
 
     // Cross Program Invocation (CPI)
     // Invoking the create_master_edition_v3 instruction on the token metadata program
-    create_master_edition_v3(
-        CpiContext::new(
-            ctx.accounts.token_metadata_program.to_account_info(),
-            CreateMasterEditionV3 {
-                edition: ctx.accounts.edition_account.to_account_info(),
-                mint: ctx.accounts.mint_nft_account.to_account_info(),
-                update_authority: ctx.accounts.payer.to_account_info(),
-                mint_authority: ctx.accounts.payer.to_account_info(),
-                payer: ctx.accounts.payer.to_account_info(),
-                metadata: ctx.accounts.metadata_account.to_account_info(),
-                token_program: ctx.accounts.token_program.to_account_info(),
-                system_program: ctx.accounts.system_program.to_account_info(),
-                rent: ctx.accounts.rent.to_account_info(),
-            },
-        ),
-        None, // Max Supply
-    )?;
+    // create_master_edition_v3(
+    //     CpiContext::new(
+    //         ctx.accounts.token_metadata_program.to_account_info(),
+    //         CreateMasterEditionV3 {
+    //             edition: ctx.accounts.edition_account.to_account_info(),
+    //             mint: ctx.accounts.mint_nft_account.to_account_info(),
+    //             update_authority: ctx.accounts.payer.to_account_info(),
+    //             mint_authority: ctx.accounts.payer.to_account_info(),
+    //             payer: ctx.accounts.payer.to_account_info(),
+    //             metadata: ctx.accounts.metadata_account.to_account_info(),
+    //             token_program: ctx.accounts.token_program.to_account_info(),
+    //             system_program: ctx.accounts.system_program.to_account_info(),
+    //             rent: ctx.accounts.rent.to_account_info(),
+    //         },
+    //     ),
+    //     None, // Max Supply
+    // )?;
 
     Ok(())
 }
@@ -115,12 +116,12 @@ pub struct CreateNFT<'info> {
     pub payer: Signer<'info>,
 
     // Add user token account to burn from
-    #[account(mut)]
-    pub associated_token_account: Account<'info, TokenAccount>,
+    // #[account(mut)]
+    // pub associated_token_account: Account<'info, TokenAccount>,
 
-    // Add token mint account to check the token type and manage burning
-    #[account(mut)]
-    pub mint_token_account: Account<'info, Mint>,
+    // // Add token mint account to check the token type and manage burning
+    // #[account(mut)]
+    // pub mint_token_account: Account<'info, Mint>,
 
     /// CHECK: Validate address by deriving pda
     #[account(
@@ -156,13 +157,13 @@ pub struct CreateNFT<'info> {
         init_if_needed,
         payer = payer,
         associated_token::mint = mint_nft_account,
-        associated_token::authority = user,
+        associated_token::authority = payer,
     )]
     pub associated_nft_token_account: Account<'info, TokenAccount>,
 
     /// CHECK: user account
-    #[account(mut)]
-    pub user: UncheckedAccount<'info>,
+    // #[account(mut)]
+    // pub user: UncheckedAccount<'info>,
     
     pub token_program: Program<'info, Token>,
     pub token_metadata_program: Program<'info, Metadata>,

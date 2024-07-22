@@ -5,13 +5,13 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-gemquest = "ADt9txqiwPM79q7XA15shypjVrKcGPQHNdAZvV8YZA48"
+gemquest = "4MUuZnYgakTqerEBjsD783s4QP2trwyy2KWZ9SXJdffZ"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "http://127.0.0.1:8899"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
