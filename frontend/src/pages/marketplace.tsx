@@ -54,9 +54,9 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
     gem10?: any;
     gem20?: any;
   }>({});
-  const umi = createUmi("https://api.devnet.solana.com").use(
-    mplTokenMetadata()
-  );
+  const [nftByUser, setNftByUser] = useState<{
+    [key: string]: number;
+  }>({});
 
   const [nftMetadata, setNftMetadata] = useState<{
     [key: string]: any;
@@ -86,10 +86,11 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
     setLoader(true);
     try {
       const rpc = new RPC(provider);
-      const [gems, nftMetadata, gemsMetadata] = await Promise.all([
+      const [gems, nftMetadata, gemsMetadata, nftByUser] = await Promise.all([
         rpc.fetchGems(),
         rpc.fetchNFT(),
         rpc.fetchGemsMetadata(),
+        rpc.fetchNFTByUser(),
       ]);
 
       setUserGems(gems);
@@ -99,7 +100,8 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
       console.log(nftMetadata);
       setNftMetadata(nftMetadata);
       setGemsMetadata(gemsMetadata);
-      console.table({ gems, nftMetadata, gemsMetadata });
+      setNftByUser(nftByUser);
+      console.table({ gems, nftMetadata, gemsMetadata, nftByUser });
     } catch (err) {
       setError("Failed to fetch data");
       console.error(err);
@@ -432,6 +434,14 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                         }`}
                       />
                       <h3>{nftMetadata[key]?.metadata?.name}</h3>
+                      {nftByUser[nftMetadata[key]?.metadata?.symbol] > 0 && (
+                        <h3>
+                          Got:{" "}
+                          <span style={{ color: "orangered" }}>
+                            {nftByUser[nftMetadata[key]?.metadata?.symbol]}
+                          </span>
+                        </h3>
+                      )}
                       <h3>
                         {nftMetadata[key]?.metadata?.properties?.gem_cost} 💎
                       </h3>
@@ -466,6 +476,15 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                 <h2>{selectedNft?.metadata?.name}</h2>
                 <p>Symbol: {selectedNft?.metadata?.symbol}</p>
                 <p>{selectedNft?.metadata?.description}</p>
+                {nftByUser[selectedNft?.metadata?.symbol] > 0 && (
+                  <p>
+                    Already got:
+                    <span style={{ color: "orangered" }}>
+                      {" "}
+                      {nftByUser[selectedNft?.metadata?.symbol]}
+                    </span>
+                  </p>
+                )}
                 <p>Cost: {selectedNft?.metadata?.properties?.gem_cost} 💎</p>
                 <p>
                   <button
