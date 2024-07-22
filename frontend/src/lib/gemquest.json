@@ -1,5 +1,5 @@
 {
-  "address": "cgGGDYw43q5Bf6U92BCM5xyNuQ5WYYC4zjhcDkbDT3f",
+  "address": "ADt9txqiwPM79q7XA15shypjVrKcGPQHNdAZvV8YZA48",
   "metadata": {
     "name": "gemquest",
     "version": "0.1.0",
@@ -8,13 +8,66 @@
   },
   "instructions": [
     {
+      "name": "approve_token",
+      "discriminator": [
+        80,
+        80,
+        106,
+        10,
+        20,
+        158,
+        63,
+        78
+      ],
+      "accounts": [
+        {
+          "name": "associated_token_account",
+          "writable": true
+        },
+        {
+          "name": "delegate"
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "create_nft",
-      "discriminator": [231, 119, 61, 97, 217, 46, 142, 109],
+      "discriminator": [
+        231,
+        119,
+        61,
+        97,
+        217,
+        46,
+        142,
+        109
+      ],
       "accounts": [
         {
           "name": "payer",
           "writable": true,
           "signer": true
+        },
+        {
+          "name": "associated_token_account",
+          "writable": true
+        },
+        {
+          "name": "mint_token_account",
+          "writable": true
         },
         {
           "name": "metadata_account",
@@ -23,7 +76,16 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [109, 101, 116, 97, 100, 97, 116, 97]
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
               },
               {
                 "kind": "account",
@@ -31,7 +93,7 @@
               },
               {
                 "kind": "account",
-                "path": "mint_account"
+                "path": "mint_nft_account"
               }
             ],
             "program": {
@@ -47,7 +109,16 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [109, 101, 116, 97, 100, 97, 116, 97]
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
               },
               {
                 "kind": "account",
@@ -55,11 +126,19 @@
               },
               {
                 "kind": "account",
-                "path": "mint_account"
+                "path": "mint_nft_account"
               },
               {
                 "kind": "const",
-                "value": [101, 100, 105, 116, 105, 111, 110]
+                "value": [
+                  101,
+                  100,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
               }
             ],
             "program": {
@@ -69,41 +148,103 @@
           }
         },
         {
-          "name": "mint_account",
+          "name": "mint_nft_account",
           "writable": true,
           "signer": true
         },
         {
-          "name": "associated_token_account",
+          "name": "associated_nft_token_account",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "account",
-                "path": "payer"
+                "path": "user"
               },
               {
                 "kind": "const",
                 "value": [
-                  6, 221, 246, 225, 215, 101, 161, 147, 217, 203, 225, 70, 206,
-                  235, 121, 172, 28, 180, 133, 237, 95, 91, 55, 145, 58, 140,
-                  245, 133, 126, 255, 0, 169
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
                 ]
               },
               {
                 "kind": "account",
-                "path": "mint_account"
+                "path": "mint_nft_account"
               }
             ],
             "program": {
               "kind": "const",
               "value": [
-                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
-                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
-                219, 233, 248, 89
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
               ]
             }
           }
+        },
+        {
+          "name": "user",
+          "writable": true
         },
         {
           "name": "token_program",
@@ -138,12 +279,25 @@
         {
           "name": "nft_uri",
           "type": "string"
+        },
+        {
+          "name": "nft_price",
+          "type": "u64"
         }
       ]
     },
     {
       "name": "create_token",
-      "discriminator": [84, 52, 204, 228, 24, 140, 234, 75],
+      "discriminator": [
+        84,
+        52,
+        204,
+        228,
+        24,
+        140,
+        234,
+        75
+      ],
       "accounts": [
         {
           "name": "payer",
@@ -162,7 +316,16 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [109, 101, 116, 97, 100, 97, 116, 97]
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
               },
               {
                 "kind": "account",
@@ -213,7 +376,16 @@
     },
     {
       "name": "initialize_program",
-      "discriminator": [176, 107, 205, 168, 24, 157, 175, 103],
+      "discriminator": [
+        176,
+        107,
+        205,
+        168,
+        24,
+        157,
+        175,
+        103
+      ],
       "accounts": [
         {
           "name": "payer",
@@ -228,7 +400,19 @@
               {
                 "kind": "const",
                 "value": [
-                  112, 114, 111, 103, 114, 97, 109, 95, 97, 100, 109, 105, 110
+                  112,
+                  114,
+                  111,
+                  103,
+                  114,
+                  97,
+                  109,
+                  95,
+                  97,
+                  100,
+                  109,
+                  105,
+                  110
                 ]
               }
             ]
@@ -243,7 +427,16 @@
     },
     {
       "name": "initialize_user_account",
-      "discriminator": [131, 248, 61, 211, 152, 205, 122, 238],
+      "discriminator": [
+        131,
+        248,
+        61,
+        211,
+        152,
+        205,
+        122,
+        238
+      ],
       "accounts": [
         {
           "name": "user_account",
@@ -253,7 +446,18 @@
               {
                 "kind": "const",
                 "value": [
-                  117, 115, 101, 114, 95, 97, 99, 99, 111, 117, 110, 116
+                  117,
+                  115,
+                  101,
+                  114,
+                  95,
+                  97,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116
                 ]
               },
               {
@@ -284,7 +488,16 @@
     },
     {
       "name": "mint_tokens_to_user",
-      "discriminator": [85, 150, 103, 133, 240, 87, 44, 73],
+      "discriminator": [
+        85,
+        150,
+        103,
+        133,
+        240,
+        87,
+        44,
+        73
+      ],
       "accounts": [
         {
           "name": "mint_authority",
@@ -292,8 +505,7 @@
           "signer": true
         },
         {
-          "name": "recipient",
-          "writable": true
+          "name": "recipient"
         },
         {
           "name": "mint_account",
@@ -311,9 +523,38 @@
               {
                 "kind": "const",
                 "value": [
-                  6, 221, 246, 225, 215, 101, 161, 147, 217, 203, 225, 70, 206,
-                  235, 121, 172, 28, 180, 133, 237, 95, 91, 55, 145, 58, 140,
-                  245, 133, 126, 255, 0, 169
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
                 ]
               },
               {
@@ -324,9 +565,38 @@
             "program": {
               "kind": "const",
               "value": [
-                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
-                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
-                219, 233, 248, 89
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
               ]
             }
           }
@@ -355,18 +625,51 @@
   "accounts": [
     {
       "name": "ProgramAdmin",
-      "discriminator": [93, 130, 19, 193, 29, 34, 250, 140]
+      "discriminator": [
+        93,
+        130,
+        19,
+        193,
+        29,
+        34,
+        250,
+        140
+      ]
     },
     {
       "name": "UserAccount",
-      "discriminator": [211, 33, 136, 16, 186, 110, 242, 127]
+      "discriminator": [
+        211,
+        33,
+        136,
+        16,
+        186,
+        110,
+        242,
+        127
+      ]
     }
   ],
   "errors": [
     {
       "code": 6000,
-      "name": "AlreadyInitialized",
-      "msg": "Program is already initialized"
+      "name": "InvalidInput",
+      "msg": "Invalid input provided."
+    },
+    {
+      "code": 6001,
+      "name": "InvalidPrice",
+      "msg": "Invalid price provided."
+    },
+    {
+      "code": 6002,
+      "name": "InsufficientBalance",
+      "msg": "Insufficient balance."
+    },
+    {
+      "code": 6003,
+      "name": "Unauthorized",
+      "msg": "Unauthorized access."
     }
   ],
   "types": [

@@ -16,13 +16,15 @@ import {
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,
+  unpackAccount,
 } from "@solana/spl-token";
 import bs58 from "bs58";
-import { AnchorProvider, BN, Program, setProvider } from "@coral-xyz/anchor";
-import { gemAddresses } from "../utils";
+import { AnchorProvider, BN, Program, setProvider, web3 } from "@coral-xyz/anchor";
+import { gemAddresses, tokenMetadataProgramId } from "../utils";
 
 export default class SolanaRpc {
   private provider: IProvider;
+
 
   constructor(provider: IProvider) {
     this.provider = provider;
@@ -433,5 +435,160 @@ export default class SolanaRpc {
       console.error("Failed to fetch user gems:", error);
       throw error;
     }
+  };
+
+  mintNFT = async (): Promise<string> => {
+    const solanaWallet = new SolanaWallet(this.provider);
+    const users = await this.getAccounts();
+    const userWallet = users[0];
+    const connectionConfig = {
+      rpcTarget: "https://api.devnet.solana.com",
+    };
+    const conn = new Connection(connectionConfig.rpcTarget);
+    // Récupérez la clé privée de l'API
+    const response = await fetch("/api/getKey", { method: "POST" });
+    const data = await response.json();
+    // Décodez la clé privée de adminWallet
+    const adminWalletSecretKey = bs58.decode(data.privateKey);
+    const adminWallet = Keypair.fromSecretKey(adminWalletSecretKey);
+
+    const provider = new AnchorProvider(conn, adminWallet as any, {
+      preflightCommitment: "finalized",
+    });
+    const program = new Program(idl as any, provider);
+    setProvider(provider);
+
+    const metadata = {
+      name: 'Free Snack',
+      symbol: 'GQFS',
+      uri: 'https://fuchsia-varying-camel-696.mypinata.cloud/ipfs/bafybeibb5rh62yfijm7ypoaphsz4rzvf7wlvjucicafu5v3eq2aur3rv3a/GQFS.json',
+    };
+    const NFT_PRICE = 10 * web3.LAMPORTS_PER_SOL;
+
+    const TOKEN_METADATA_PROGRAM_ID = new PublicKey(tokenMetadataProgramId);
+
+    // const mintNftTokenAccount = new PublicKey(mintAddress);
+    const MINT_NFT_ACCOUNT = new Keypair();
+
+    const associatedNftTokenAccount = getAssociatedTokenAddressSync(
+      MINT_NFT_ACCOUNT.publicKey,
+      new PublicKey(userWallet)
+    );
+
+    const [metadataAccount] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from("metadata"),
+        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+        MINT_NFT_ACCOUNT.publicKey.toBuffer(),
+      ],
+      TOKEN_METADATA_PROGRAM_ID
+    );
+
+    const [editionAccount] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from("metadata"),
+        TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+        MINT_NFT_ACCOUNT.publicKey.toBuffer(),
+        Buffer.from("edition"),
+      ],
+      TOKEN_METADATA_PROGRAM_ID
+    );
+
+    const MINT_TOKEN_ACCOUNT = new PublicKey(gemAddresses[1]);
+
+    const associatedTokenAccount = getAssociatedTokenAddressSync(
+      MINT_TOKEN_ACCOUNT,
+      new PublicKey(userWallet)
+    );
+
+
+    console.table({
+      programId: program.programId.toBase58(),
+      tokenMetadataProgramId: TOKEN_METADATA_PROGRAM_ID.toBase58(),
+      userWallet: userWallet,
+      signer: adminWallet.publicKey.toBase58(),
+      mintNftAccount: MINT_NFT_ACCOUNT.publicKey.toBase58(),
+      associatedNftTokenAccount: associatedNftTokenAccount.toBase58(),
+      mintTokenAccount: MINT_TOKEN_ACCOUNT.toBase58(),
+      associatedTokenAccount: associatedTokenAccount.toBase58(),
+      metadataAccount: metadataAccount.toBase58(),
+      editionAccount: editionAccount.toBase58(),
+    });
+
+    // Give allowance to admin to burn user token
+    const instructionApproveToken = await program.instruction
+      .approveToken(new BN(NFT_PRICE),
+        {
+          accounts: {
+
+            associatedTokenAccount: associatedTokenAccount,
+
+            delegate: adminWallet.publicKey,
+            authority: userWallet,
+
+            // system
+            tokenProgram: TOKEN_PROGRAM_ID,
+          }
+        });
+
+
+    // User need to sign the approve transaction
+    const recentBlockhash = await conn.getRecentBlockhash("finalized");
+
+    const transactionApprove = new Transaction({
+      recentBlockhash: recentBlockhash.blockhash,
+      feePayer: new PublicKey(userWallet),
+    }).add(instructionApproveToken);
+
+    // Using web3auth wallet to sign the transaction
+    const signedTx = await solanaWallet.signAndSendTransaction(transactionApprove);
+
+    console.log("Approve Token Transaction confirmed:", signedTx);
+
+
+    const accountInfo = await program.provider.connection.getAccountInfo(associatedTokenAccount);
+    const uAccount = unpackAccount(associatedTokenAccount, accountInfo, TOKEN_PROGRAM_ID);
+
+    console.log(uAccount.delegatedAmount.toString());
+
+
+    // Burn and mint NFT
+    const instructionCreateNFT = program.instruction.createNft(metadata.name, metadata.symbol, metadata.uri, new BN(NFT_PRICE), {
+      accounts: {
+        payer: adminWallet.publicKey,
+
+        mintTokenAccount: MINT_TOKEN_ACCOUNT,
+        associatedTokenAccount: associatedTokenAccount,
+
+        metadataAccount: metadataAccount,
+        editionAccount: editionAccount,
+
+        mintNftAccount: MINT_NFT_ACCOUNT.publicKey,
+        associatedNftTokenAccount: associatedNftTokenAccount,
+
+        user: new PublicKey(userWallet),
+
+        // system
+        tokenProgram: TOKEN_PROGRAM_ID,
+        tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        systemProgram: web3.SystemProgram.programId,
+        rent: web3.SYSVAR_RENT_PUBKEY,
+      },
+    });
+
+    const { blockhash } = await conn.getRecentBlockhash("finalized");
+
+    const transaction = new Transaction({
+      recentBlockhash: blockhash,
+      feePayer: adminWallet.publicKey,
+    }).add(instructionCreateNFT);
+
+    const signature = await sendAndConfirmTransaction(conn, transaction, [
+      adminWallet, MINT_NFT_ACCOUNT
+    ]);
+    console.log("Mint NFT Transaction confirmed:", signature);
+    return signature;
+    return '';
   };
 }

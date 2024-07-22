@@ -160,7 +160,7 @@ pub struct CreateNFT<'info> {
     )]
     pub associated_nft_token_account: Account<'info, TokenAccount>,
 
-    /// CHECK: yser account
+    /// CHECK: user account
     #[account(mut)]
     pub user: UncheckedAccount<'info>,
     

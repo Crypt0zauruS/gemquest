@@ -22,4 +22,7 @@ deploy:
 test:
 	@anchor test
 
+sdeploy:
+	@yarn run ts-mocha -p ./tsconfig.json -t 1000000 scripts/deploy.ts
+
 # solana config set --url devnet

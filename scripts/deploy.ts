@@ -22,11 +22,12 @@ let provider: anchor.AnchorProvider;
 
 async function main() {
 
-  // const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
-  const connection = new Connection("http://127.0.0.1:8899", "confirmed");
+  const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
+  // const connection = new Connection("http://127.0.0.1:8899", "confirmed");
 
   // Set Wallet that will be the admin of the program
-  // const walletKP = Keypair.fromSecretKey(new Uint8Array(bs58.decode(process.env.DEPLOYER_PRIVATE_KEY)));
+  const walletKP = Keypair.fromSecretKey(new Uint8Array(bs58.decode(process.env.PRIVATE_KEY)));
+  console.log(walletKP);
   // wallet = new anchor.Wallet(walletKP);
   wallet = new anchor.Wallet(Keypair.generate());
   console.log("Wallet:", wallet.publicKey.toBase58());
@@ -62,12 +63,12 @@ async function main() {
   // };
   // await CreateNFT(metadataNFT_FreeSnack);
 
-  const metadataToken_GEM = {
-    name: 'Solana GEMS',
-    symbol: 'GEMS',
-    uri: 'ipfs://QmTNdfcWPYmYHrmDnWvXMyjDMYxApxGSGMA41LEYrz3uG9/gem_1.json',
-  };
-  await CreateToken(metadataToken_GEM);
+  // const metadataToken_GEM = {
+  //   name: 'Solana GEMS',
+  //   symbol: 'GEMS',
+  //   uri: 'ipfs://QmTNdfcWPYmYHrmDnWvXMyjDMYxApxGSGMA41LEYrz3uG9/gem_1.json',
+  // };
+  // await CreateToken(metadataToken_GEM);
 
 
   // await MintTokensToUser();
