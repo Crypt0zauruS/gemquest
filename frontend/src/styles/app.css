@@ -185,7 +185,7 @@ header,
   color: var(--light-grey-color);
   padding: 10px 0 !important;
   width: 100% !important;
-  position: relative !important;
+  position: absolute;
   bottom: 0 !important;
 }
 
@@ -1007,13 +1007,15 @@ input:checked + .slider:before {
   font-weight: bold;
   text-align: center;
   width: 200px;
-  box-shadow: 0 0 5px 5px red;
   margin: 0 auto;
   margin-bottom: 20px;
   margin-top: 30px;
-  padding: 10px;
-  border-radius: 10px;
-  background-image: linear-gradient(45deg, #a86464, #34343f);
+  padding: 20px;
+  border-radius: 8px;
+  /* background-image: linear-gradient(45deg, #a86464, #34343f); */
+  background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.3), transparent);
+  box-shadow: 0 0 15px red,
+  inset 0 0 15px red;
 }
 
 /* Sci-fi animated background effect */

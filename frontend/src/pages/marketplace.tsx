@@ -288,7 +288,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                 >
                   Welcome to the Marketplace !
                 </h3>
-                <hr />
+                <hr style={{ paddingTop: "10px" }} />
                 <div className="gemsContainer">
                   {userGems?.gem1 > 0 && (
                     <div className="gemItem">
@@ -345,9 +345,10 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                 </div>
 
                 <div className="totalGems">
-                  <span>Total gems: {totalGems}</span>
+                  <span>💎 {totalGems} GEMS 💎 </span>
                 </div>
                 <hr />
+                <div style={{ paddingTop: "10px" }} />
                 <p
                   className="modalContentNft"
                   style={{
