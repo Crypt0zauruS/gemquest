@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Front-End de GemQuest
 
-## Getting Started
+## Présentation
 
-First, run the development server:
+Le front-end de GemQuest offre une interface utilisateur réactive et performante développée avec React et Next.js. Il intègre des solutions avancées pour l'authentification et la génération de contenu interactif, fournissant une expérience utilisateur riche et immersive.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Technologies Utilisées
+
+- **React** : Utilisé pour construire des composants UI réactifs et gérables, facilitant une expérience utilisateur fluide.
+- **Next.js** : Optimise le rendu côté serveur pour améliorer les performances et le référencement SEO, tout en simplifiant la gestion des routes et des API.
+- **Web3Auth** : Permet une authentification sécurisée et facile en utilisant des wallets cryptographiques, essentielle pour intégrer des fonctionnalités liées à la blockchain et faciliter l'adoption.
+- **OpenAI** : Employé pour générer des quizz de manière dynamique, offrant un contenu personnalisé et interactif aux utilisateurs.
+
+## Flux d'Interaction (Diagramme de Séquence)
+
+Le diagramme suivant illustre le flux d'interactions dans l'application, démontrant comment les différentes technologies s'articulent pour fournir une expérience utilisateur complète :
+
+```mermaid
+sequenceDiagram
+    Frontend->>+Web3Auth: 1) Authentication
+    Web3Auth-->>-Frontend: User Public Key
+    Frontend->>+Program: 2) Get user data
+    Program-->>-Frontend: NFT list, token balance
+    Frontend->>+Openai: 3) QRcode scan
+    Openai-->>-Frontend: Quizz generated
+    Frontend->>+Program : 4) Update token balance
+    Program-->>-Frontend :  New balance
+    Frontend->>+Program : 5) Achat de NFT
+    Program-->>+Program : 6) Burn Token amount
+    Program-->>-Frontend : Token Balance, NFT
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ce diagramme met en évidence le processus d'authentification, la récupération des données, la génération de contenu, et les transactions liées aux NFTs, illustrant une séquence fluide et sécurisée d'opérations.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Configuration et Déploiement
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Pour configurer et démarrer le front-end de GemQuest localement, suivez ces étapes :
 
-## Learn More
+1. **Clonez le dépôt et naviguez dans le dossier du front-end** :
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   git clone https://github.com/Crypt0zauruS/gemquest
+   cd gemquest/frontend
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Installez les dépendances** :
+   ```bash
+   npm install
+   ```
+   ou
+   ```bash
+   yarn install
+   ```
+3. **Configurez les variables d'environnement** :
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+   > petit rappel
 
-## Deploy on Vercel
+   - Copiez le fichier `.env.local.example` en `.env` et ajustez les variables nécessaires.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+4. **Lancez le serveur de développement** :
+   ```bash
+   npm run dev
+   ```

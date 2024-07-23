@@ -5,7 +5,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log("Web3Auth API called");
   const clientId = process.env.WEB3AUTH_CLIENT_ID;
 
-  console.log("Web3Auth client ID:", clientId);
+  // console.log("Web3Auth client ID:", clientId);
   if (!clientId) {
     return res
       .status(500)
