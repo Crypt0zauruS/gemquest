@@ -160,7 +160,7 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
                 <div>
                   {address && <h2>Account:</h2>}
                   <form className="inputBox">
-                    {balance && address && (
+                    {address && (
                       <p>
                         {formatSolanaAddress()}
                         <br />
