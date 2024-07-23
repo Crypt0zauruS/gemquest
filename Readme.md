@@ -1,13 +1,15 @@
 # GemQuest
 
 ## Links
+
 [`Vercel`](https://gemquest-pi.vercel.app/)
 
 ## Présentation du projet
 
 GemQuest est une application décentralisée (DApp) basée sur la blockchain Solana, conçue pour offrir une expérience interactive centrée sur la gestion de tokens et l'échange de NFTs. Les utilisateurs peuvent participer à des quizz interactifs, gagner des tokens, et les utiliser pour acheter des NFTs uniques dans une marketplace intégrée. L'application combine des éléments de jeu avec des transactions blockchain pour créer une plateforme immersive et engageante.
 
-Voici un résumé du diagramme de séquence disponnible dans la partie 
+Voici un résumé du diagramme de séquence disponnible dans la partie
+
 ```mermaid
     sequenceDiagram
         Frontend->>+Web3Auth: Authentication
@@ -42,23 +44,40 @@ Le front-end de GemQuest est développé avec **React** et **Next.js**. Il utili
 Pour exécuter GemQuest localement, suivez ces étapes :
 
 1. **Clonez le dépôt** :
+
    ```bash
    git clone https://github.com/Crypt0zauruS/gemquest
    cd gemquest
    ```
 
 2. **Installez les dépendances** :
+
    - Back-end :
+
      ```bash
-     cd anchor && npm install
+     npm install
      ```
+
+     ou
+
+     ```bash
+      yarn install
+     ```
+
    - Front-end :
      ```bash
      cd frontend && npm install
      ```
+     ou
+     ```bash
+     cd frontend && yarn install
+     ```
 
 3. **Configurez les variables d'environnement** :
-   - Copiez le fichier `.env.local.example` en `.env` et ajustez les variables nécessaires.
+
+   - Dans le repertoire racine, copiez le fichier `.env.sample` en `.env` et ajustez les variables nécessaires.
+
+   - Dans le repertoire frontend, copiez le fichier `.env.local.sample` en `.env.local` et ajustez les variables nécessaires.
 
 4. **Démarrez les serveurs de développement** :
    - Lancez le serveur Anchor :
