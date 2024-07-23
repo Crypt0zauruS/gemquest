@@ -1,8 +1,19 @@
 # GemQuest
 
-## Links
+## Développeurs
 
-[`Vercel`](https://gemquest-pi.vercel.app/)
+- ANO Maxence
+- CERLO Remy
+- SCOTTE Alexandre
+
+## Liens
+
+[`Notre dApp GemQuest`](https://gemquest-pi.vercel.app/)
+
+[`Notre Program`](https://explorer.solana.com/address/4MUuZnYgakTqerEBjsD783s4QP2trwyy2KWZ9SXJdffZ?ref=alphasec.io&cluster=devnet)
+
+[`Le Readme du front_end`](https://github.com/Crypt0zauruS/gemquest/tree/master/frontend/README.md)
+
 
 ## Présentation du projet
 
