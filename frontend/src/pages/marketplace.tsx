@@ -284,6 +284,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                     width: "350px",
                     fontSize: "1.5rem",
                     margin: "0 auto",
+                    marginTop:"10px"
                   }}
                 >
                   Welcome to the Marketplace !
