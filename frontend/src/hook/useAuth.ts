@@ -14,18 +14,18 @@ export const useAuth = () => {
       const response = await fetch("/api/web3auth");
       const data = await response.json();
       const clientId = data.clientId;
-      console.log("Web3Auth client ID:", clientId);
+      // console.log("Web3Auth client ID:", clientId);
       const web3auth = await getWeb3AuthInstance(clientId);
       const authServiceInstance = new AuthService(web3auth);
       setAuthService(authServiceInstance);
 
       await authServiceInstance.initWeb3authModal();
     } catch (error) {
-      console.error(error);
+      console.error("Error during initAuth:", error);
     }
   }, []);
 
-  const handleLogin = async () => {
+  const handleLogin = useCallback(async () => {
     if (!authService) {
       console.log("AuthService not initialized yet");
       return;
@@ -39,11 +39,11 @@ export const useAuth = () => {
         setProvider(result.web3authProvider);
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error during login:", error);
     }
-  };
+  }, [authService]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     if (!authService) {
       console.log("AuthService not initialized yet");
       return;
@@ -54,9 +54,9 @@ export const useAuth = () => {
       setProvider(null);
       setLoggedIn(false);
     } catch (error) {
-      console.error(error);
+      console.error("Error during logout:", error);
     }
-  };
+  }, [authService]);
 
   return {
     initAuth,
