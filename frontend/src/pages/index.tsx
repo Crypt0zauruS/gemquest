@@ -198,7 +198,7 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
                               disabled={loading || !address}
                               onClick={() => router.push("/marketplace")}
                             >
-                              Reach your Marketplace !
+                              Reach our Marketplace !
                             </button>
                           </div>
                         )}
