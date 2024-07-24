@@ -38,6 +38,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
   const [selectedNft, setSelectedNft] = useState<Nft | null>(null);
   const [loader, setLoader] = useState(false);
   const [userGems, setUserGems] = useState<{
@@ -70,6 +71,13 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
 
   const closeRewardsModal = () => {
     setIsRewardsModalOpen(false);
+  };
+
+  const openCollectionModal = () => {
+    setIsCollectionModalOpen(true);
+  };
+  const closeCollectionModal = () => {
+    setIsCollectionModalOpen(false);
   };
 
   useEffect(() => {
@@ -362,7 +370,23 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                   }}
                   onClick={openRewardsModal}
                 >
-                  Our rewards to exchange against 💎
+                  Redeem 💎 for rewards
+                </p>
+                <div style={{ paddingTop: "20px" }} />
+                <p
+                  className="modalContentNft"
+                  style={{
+                    fontFamily: "Final Frontier",
+                    color: "orangered",
+                    width: "350px",
+                    fontSize: "1.4rem",
+                    margin: "0 auto",
+                    cursor: "pointer",
+                    marginBottom: "10px",
+                  }}
+                  onClick={openCollectionModal}
+                >
+                  Your collection
                 </p>
               </div>
             )}
@@ -434,14 +458,6 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                           }`}
                       />
                       <h3>{nftMetadata[key]?.metadata?.name}</h3>
-                      {nftByUser[nftMetadata[key]?.metadata?.symbol] > 0 && (
-                        <h3>
-                          Got:{" "}
-                          <span style={{ color: "orangered" }}>
-                            {nftByUser[nftMetadata[key]?.metadata?.symbol]}
-                          </span>
-                        </h3>
-                      )}
                       <h3>
                         {nftMetadata[key]?.metadata?.properties?.gem_cost} 💎
                       </h3>
@@ -511,6 +527,49 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                     marginTop: "10px",
                   }}
                   onClick={closeDetailModal}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
+          {isCollectionModalOpen && (
+            <div className="modalnft">
+              <div className="modalContentNft">
+                <div>
+                  <h4 style={{ textAlign: "center", margin: "5px" }}>
+                    Check your rewards collection !
+                  </h4>
+                </div>
+                <hr />
+                <div className="rewardsContainer">
+                  {Object.keys(nftMetadata).map((key) => (
+
+                    nftByUser[nftMetadata[key]?.metadata?.symbol] > 0 && (
+                      <div
+                        key={key}
+                        className="rewardItem"
+                      >
+                        <img
+                          src={nftMetadata[key]?.metadata?.image?.replace(
+                            "ipfs://",
+                            ipfsGateway
+                          )}
+                          alt={nftMetadata[key]?.metadata?.name}
+                          className={`rewardImage blue`}
+                        />
+                        <h3>
+                          {nftMetadata[key]?.metadata?.name} {nftByUser[nftMetadata[key]?.metadata?.symbol] > 1 ? `(x${nftByUser[nftMetadata[key]?.metadata?.symbol]})` : ""}
+                        </h3>
+
+                      </div>
+                    )
+
+                  ))}
+                </div>
+                <button
+                  className="btnResult success"
+                  onClick={closeCollectionModal}
                 >
                   Close
                 </button>

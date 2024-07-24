@@ -1076,6 +1076,10 @@ input:checked + .slider:before {
   box-shadow: 0 0 6px 6px rgb(7, 198, 7);
 }
 
+.blue {
+  box-shadow: 0 0 6px 6px rgb(0, 230, 230, 0.7);
+}
+
 .rewardsContainer {
   display: flex;
   flex-wrap: wrap;
