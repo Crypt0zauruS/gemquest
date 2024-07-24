@@ -37,8 +37,26 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-image: url(/images/background.png);
-  background-repeat: repeat;
+  background-color: black;
+ 
+  background-size: cover;
+  background-repeat: no-repeat;
+  position:relative;
+ 
+}
+
+body::before {
+  content: '';
+  background-image: url(/images/background.webp); /* Replace with the correct path to your image */
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0.3; 
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  position: absolute;
+  z-index: -1;
 }
 
 /* MAIN */
