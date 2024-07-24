@@ -154,11 +154,6 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
     try {
       setLoader(true);
       const rpc = new RPC(provider);
-      // const nft = Object.keys(nftMetadata).find(nft => nft.symbol == selectedNft?.symbol
-      // );
-      // console.log(nftMetadata[2]);
-      // nftMetadata.find((nft: any) => {
-      // );
       console.log(selectedNft);
       toast.loading(`Approve burning GEMS Tokens ...`, {
         theme: "dark",
@@ -217,6 +212,10 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
         draggable: false,
         progress: undefined,
       });
+
+      // Refresh data
+      fetchData();
+
     } catch (error) {
       console.error(error);
       toast.error("Error during NFT minting", {
@@ -292,7 +291,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                     width: "350px",
                     fontSize: "1.5rem",
                     margin: "0 auto",
-                    marginTop:"10px"
+                    marginTop: "10px"
                   }}
                 >
                   Welcome to the Marketplace !
@@ -493,15 +492,6 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                 <h2>{selectedNft?.metadata?.name}</h2>
                 <p>Symbol: {selectedNft?.metadata?.symbol}</p>
                 <p>{selectedNft?.metadata?.description}</p>
-                {nftByUser[selectedNft?.metadata?.symbol] > 0 && (
-                  <p>
-                    Already got:
-                    <span style={{ color: "orangered" }}>
-                      {" "}
-                      {nftByUser[selectedNft?.metadata?.symbol]}
-                    </span>
-                  </p>
-                )}
                 <p>Cost: {selectedNft?.metadata?.properties?.gem_cost} 💎</p>
                 <p>
                   <button
