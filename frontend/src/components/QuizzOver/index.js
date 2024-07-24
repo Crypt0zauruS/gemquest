@@ -196,7 +196,12 @@ const QuizzOver = forwardRef((props, ref) => {
       <ToastContainer />
       {decision}
       {loading ? (
-        <Loader loadingMsg={"Minting your Gems in progress..."} />
+        <Loader
+          loadingMsg={"Minting your Gems in progress..."}
+          styling={{
+            textAlign: "center",
+          }}
+        />
       ) : (
         <>
           {" "}

@@ -202,7 +202,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
         selectedNft?.metadata?.properties?.gem_cost
       );
       toast.dismiss();
-      toast.success(`NFT ! ${selectedNft?.metadata?.name} minterd \n`, {
+      toast.success(`NFT ! ${selectedNft?.metadata?.name} minted \n`, {
         theme: "dark",
         position: "top-right",
         autoClose: 5000,
