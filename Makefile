@@ -25,4 +25,13 @@ test:
 sdeploy:
 	@yarn run ts-mocha -p ./tsconfig.json -t 1000000 scripts/deploy.ts
 
+deployNft:
+	@yarn run ts-mocha -p ./tsconfig.json -t 1000000 scripts/deployGems.ts
+
+deployGem:
+	@yarn run ts-mocha -p ./tsconfig.json -t 1000000 scripts/deployNFT.ts
+
+airdropGem:
+	@yarn run ts-mocha -p ./tsconfig.json -t 1000000 scripts/mintTokenToUser.ts
+
 # solana config set --url devnet
