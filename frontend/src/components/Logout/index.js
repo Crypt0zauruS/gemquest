@@ -27,12 +27,17 @@ const Logout = ({ logout }) => {
 
   return (
     <div className="logoutContainer">
-      <p className="logoutText">Logout & RESET</p>
-
-      <label className="switch">
+      <h1
+        className="logoutText"
+        onClick={() => router.push("/")}
+        style={{ cursor: "pointer" }}
+      >
+        <p> Logout </p>
+      </h1>
+      {/* <label className="switch">
         <input onChange={handleChange} type="checkbox" checked={checked} />
         <span className="slider round" data-tip={`Reset the quiz`}></span>
-      </label>
+      </label> */}
       <ReactTooltip place="left" effect="solid" />
     </div>
   );

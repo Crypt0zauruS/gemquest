@@ -48,6 +48,7 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
           const rpc = new RPC(provider);
           const accounts = await rpc.getAccounts();
           const address = accounts[0];
+          console.log(address);
           // Handle message signing
           const signature = await rpc.signMessage(messageToSign);
           if (!signature) {
@@ -151,17 +152,17 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
               )}
 
               {!loader ? (
-                <h2>Status: {status} </h2>
+                <h2 style={{ textAlign: "center" }}>Status: {status} </h2>
               ) : (
                 <Loader loadingMsg={undefined} styling={undefined} />
               )}
 
               {loggedIn && (
                 <div>
-                  {address && <h2>Account:</h2>}
+                  {/* {address && <h2>Account:</h2>} */}
                   <form className="inputBox">
-                    {balance && address && (
-                      <p>
+                    {address && (
+                      <p style={{ marginTop: "10px" }}>
                         {formatSolanaAddress()}
                         <br />
                         <span
@@ -180,7 +181,7 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
                     )}
                     <hr />
                     {loggedIn && (
-                      <>
+                      <div style={{ paddingTop: "10px" }}>
                         {address && (
                           <div>
                             <button
@@ -197,7 +198,7 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
                               disabled={loading || !address}
                               onClick={() => router.push("/marketplace")}
                             >
-                              Reach your Marketplace !
+                              Reach our Marketplace !
                             </button>
                           </div>
                         )}
@@ -208,7 +209,7 @@ const Login: React.FC<LoginProps> = ({ login, logout, loggedIn, provider }) => {
                         >
                           Logout
                         </button>
-                      </>
+                      </div>
                     )}
                   </form>
                 </div>

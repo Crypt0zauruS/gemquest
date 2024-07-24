@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import ReactTooltip from "react-tooltip-rc";
 
 const Header = () => {
   const router = useRouter();
@@ -7,10 +8,10 @@ const Header = () => {
   return (
     <header>
       <div className="banner-container">
-        <h1 onClick={() => router.push("/")} style={{ cursor: "pointer" }}>
+      
+        <h1 onClick={() => router.push("/")} style={{ cursor: "pointer" }} data-tip={`Back to Home`}>
           GemQuest
         </h1>
-
         {isHomePage && (
           <>
             <hr />
@@ -22,6 +23,7 @@ const Header = () => {
           </>
         )}
       </div>
+      <ReactTooltip place="left" effect="solid" />
     </header>
   );
 };
