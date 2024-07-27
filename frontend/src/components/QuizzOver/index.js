@@ -59,8 +59,8 @@ const QuizzOver = forwardRef((props, ref) => {
   };
 
   const handleMintGems = async () => {
-    //let gemsToMint = gemsEarned;
-    let gemsToMint = 19;
+    let gemsToMint = gemsEarned;
+    // let gemsToMint = 19;
     if (gemsToMint === 0) {
       return;
     }
