@@ -6,11 +6,9 @@ import Footer from "../components/Footer";
 import Loader from "../components/Loader";
 import { useRouter } from "next/router";
 import RPC from "../services/solanaRPC";
-import { ipfsGateway } from "../utils";
-import { mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
-import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import { ipfsGateway, gemAddresses, gemTypes } from "../utils";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import Logout from "../components/Logout";
-import { GiConsoleController } from "react-icons/gi";
 
 interface LoginProps {
   login: () => Promise<void>;
@@ -30,6 +28,10 @@ interface Nft {
     gem_cost?: number;
   };
 }
+
+type ApprovedGems = {
+  [key: number]: bigint;
+};
 
 const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
   const router = useRouter();
@@ -54,6 +56,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
     gem5?: any;
     gem10?: any;
     gem20?: any;
+    [key: string]: any; // Add this line to allow indexing with a number
   }>({});
   const [nftByUser, setNftByUser] = useState<{
     [key: string]: number;
@@ -150,6 +153,128 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
     setIsDetailModalOpen(false);
   };
 
+  const checkAllowance = async (
+    rpc: RPC,
+    userWallet: string,
+    gemTypes: { type: string; value: number }[]
+  ): Promise<ApprovedGems> => {
+    let fetch: ApprovedGems = {};
+    const fetching = gemTypes.map(async (gemType) => {
+      const mintAddress = new PublicKey(
+        gemAddresses[gemType.value as 1 | 5 | 10 | 20]
+      );
+      try {
+        const res = await rpc.checkApproveToken(
+          new PublicKey(userWallet),
+          mintAddress
+        );
+        console.log(
+          "Allowance for",
+          gemAddresses[gemType.value as 1 | 5 | 10 | 20],
+          res
+        );
+        fetch = { ...fetch, [gemType.value]: res } as ApprovedGems;
+      } catch (error) {
+        console.error(
+          `Error checking approval for ${
+            gemAddresses[gemType.value as 1 | 5 | 10 | 20]
+          }:`,
+          error
+        );
+        fetch = { ...fetch, [gemType.value]: 0n }; // Default to 0 if there is an error
+      }
+    });
+    await Promise.all(fetching);
+    console.log(fetch);
+    return fetch;
+  };
+
+  // const checkTokenAllowance = async (
+  //   rpc: RPC,
+  //   userWallet: string,
+  //   gemTypes: { type: string; value: number }[]
+  // ) => {
+  //   let attempts = 0;
+  //   const maxAttempts = 20; // Maximum number of attempts
+  //   const interval = 2000; // Interval between attempts in milliseconds
+
+  //   while (attempts < maxAttempts) {
+  //     let allApproved = true;
+  //     for (const gemType of gemTypes) {
+  //       const mintAddress = gemAddresses[gemType.value as 1 | 5 | 10 | 20];
+  //       const accountInfo = await rpc.checkApproveToken(
+  //         new PublicKey(userWallet),
+  //         new PublicKey(mintAddress)
+  //       );
+  //       if (accountInfo < gemType.value) {
+  //         allApproved = false;
+  //         break;
+  //       }
+  //     }
+  //     if (allApproved) {
+  //       return true;
+  //     }
+  //     attempts++;
+  //     await new Promise((resolve) => setTimeout(resolve, interval));
+  //   }
+  //   return false;
+  // };
+
+  const approveRequiredGems = async (
+    rpc: RPC,
+    userWallet: string,
+    gemCost: number
+  ) => {
+    // Get already approved gems
+    let approvedGems = await checkAllowance(rpc, userWallet, gemTypes);
+    // Sort gemTypes by value in descending order
+    gemTypes.sort((a, b) => b.value - a.value);
+    let remainingCost = gemCost;
+    for (const gemType of gemTypes) {
+      const gemAmount = userGems[gemType.type];
+      if (gemAmount > 0) {
+        const alreadyApproved = Number(approvedGems[gemType.value] || 0n);
+        const gemsNeeded = Math.max(
+          Math.floor((remainingCost - alreadyApproved) / gemType.value),
+          0
+        );
+
+        const gemsToApprove = Math.min(gemsNeeded, gemAmount);
+        if (gemsToApprove > 0) {
+          const gemPublicKey = new PublicKey(
+            gemAddresses[gemType.value as 1 | 5 | 10 | 20]
+          );
+          console.log("Approving", gemsToApprove, gemPublicKey);
+          await rpc.approveTokenBurn(gemsToApprove, gemPublicKey);
+          remainingCost -= gemsToApprove * gemType.value;
+        }
+      }
+      if (remainingCost <= 0) break;
+    }
+    // Re-check the allowances after attempting to approve more gems
+    approvedGems = await checkAllowance(rpc, userWallet, gemTypes);
+    // Calculate the new remaining cost based on the latest approvals
+    remainingCost =
+      gemCost -
+      gemTypes.reduce((acc, gemType) => {
+        const approvedAmount = Number(approvedGems[gemType.value] || 0n);
+        return (
+          acc + Math.min(approvedAmount, userGems[gemType.type] * gemType.value)
+        );
+      }, 0);
+
+    if (
+      remainingCost > 0 &&
+      gemTypes.every(
+        (gemType) =>
+          Number(approvedGems[gemType.value] || 0n) >=
+          userGems[gemType.type] * gemType.value
+      )
+    ) {
+      throw new Error("Not enough gems to cover the cost");
+    }
+  };
+
   const handleBuyNFT = async (address: string) => {
     try {
       setLoader(true);
@@ -165,10 +290,35 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
         draggable: false,
         progress: undefined,
       });
-      const tx = await rpc.approveTokenBurn(
-        selectedNft?.metadata?.properties?.gem_cost
-      );
+      const accounts = await rpc.getAccounts();
+      const userWallet = accounts[0];
+      const gemCost = selectedNft?.metadata?.properties?.gem_cost;
+      //await rpc.approveTokenBurn(gemCost);
+      await approveRequiredGems(rpc, userWallet, gemCost);
       toast.dismiss();
+
+      // TODO: Investigate, the TX is finalized but the token allowance is not updated
+      // We need to wait a little
+      // await new Promise(resolve => setTimeout(resolve, 5000));
+      // await rpc.checkApproveToken();
+      // await new Promise(resolve => setTimeout(resolve, 5000));
+      // await rpc.checkApproveToken();
+      // Vérifier l'allocation des jetons
+
+      // const accounts = await rpc.getAccounts();
+      // const userWallet = accounts[0];
+      // const mintAddress = new PublicKey(gemAddresses[1]);
+      // const allowanceUpdated = await checkTokenAllowance(
+      //   rpc,
+      //   userWallet,
+      //   mintAddress,
+      //   gemCost
+      // );
+
+      // if (!allowanceUpdated) {
+      //   throw new Error("Token allowance not updated in time");
+      // }
+
       toast.success(`Burn GEMS tokens approved ! \n`, {
         theme: "dark",
         position: "top-right",
@@ -180,13 +330,6 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
         progress: undefined,
       });
 
-      // TODO: Investigate, the TX is finalized but the token allowance is not updated
-      // We need to wait a little
-      // await new Promise(resolve => setTimeout(resolve, 5000));
-      // await rpc.checkApproveToken();
-      // await new Promise(resolve => setTimeout(resolve, 5000));
-      // await rpc.checkApproveToken();
-
       toast.loading(`Minting ${selectedNft?.metadata?.name} NFT ...`, {
         theme: "dark",
         position: "top-right",
@@ -197,10 +340,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
         draggable: false,
         progress: undefined,
       });
-      await rpc.burnTokenTransferNFT(
-        address,
-        selectedNft?.metadata?.properties?.gem_cost
-      );
+      await rpc.burnTokenTransferNFT(address, gemCost);
       toast.dismiss();
       toast.success(`NFT ! ${selectedNft?.metadata?.name} minted \n`, {
         theme: "dark",
@@ -212,10 +352,8 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
         draggable: false,
         progress: undefined,
       });
-
       // Refresh data
-      fetchData();
-
+      await fetchData();
     } catch (error) {
       console.error(error);
       toast.error("Error during NFT minting", {
@@ -229,9 +367,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
         progress: undefined,
       });
     } finally {
-      setTimeout(() => {
-        setLoader(false);
-      }, 2000);
+      setLoader(false);
     }
   };
 
@@ -291,7 +427,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                     width: "350px",
                     fontSize: "1.5rem",
                     margin: "0 auto",
-                    marginTop: "10px"
+                    marginTop: "10px",
                   }}
                 >
                   Welcome to the Marketplace !
@@ -449,13 +585,14 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                           ipfsGateway
                         )}
                         alt={nftMetadata[key]?.metadata?.name}
-                        className={`rewardImage ${nftMetadata[key]?.metadata?.properties?.gem_cost &&
+                        className={`rewardImage ${
+                          nftMetadata[key]?.metadata?.properties?.gem_cost &&
                           Number(
                             nftMetadata[key]?.metadata?.properties?.gem_cost
                           ) <= totalGems
-                          ? "green"
-                          : "red"
-                          }`}
+                            ? "green"
+                            : "red"
+                        }`}
                       />
                       <h3>{nftMetadata[key]?.metadata?.name}</h3>
                       <h3>
@@ -503,7 +640,7 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                     disabled={
                       loader ||
                       totalGems <
-                      Number(selectedNft?.metadata?.properties?.gem_cost)
+                        Number(selectedNft?.metadata?.properties?.gem_cost)
                     }
                     onClick={() => handleBuyNFT(selectedNft?.address)}
                   >
@@ -534,29 +671,29 @@ const Marketplace: React.FC<LoginProps> = ({ logout, loggedIn, provider }) => {
                 </div>
                 <hr />
                 <div className="rewardsContainer">
-                  {Object.keys(nftMetadata).map((key) => (
-
-                    nftByUser[nftMetadata[key]?.metadata?.symbol] > 0 && (
-                      <div
-                        key={key}
-                        className="rewardItem"
-                      >
-                        <img
-                          src={nftMetadata[key]?.metadata?.image?.replace(
-                            "ipfs://",
-                            ipfsGateway
-                          )}
-                          alt={nftMetadata[key]?.metadata?.name}
-                          className={`rewardImage blue`}
-                        />
-                        <h3>
-                          {nftMetadata[key]?.metadata?.name} {nftByUser[nftMetadata[key]?.metadata?.symbol] > 1 ? `(x${nftByUser[nftMetadata[key]?.metadata?.symbol]})` : ""}
-                        </h3>
-
-                      </div>
-                    )
-
-                  ))}
+                  {Object.keys(nftMetadata).map(
+                    (key) =>
+                      nftByUser[nftMetadata[key]?.metadata?.symbol] > 0 && (
+                        <div key={key} className="rewardItem">
+                          <img
+                            src={nftMetadata[key]?.metadata?.image?.replace(
+                              "ipfs://",
+                              ipfsGateway
+                            )}
+                            alt={nftMetadata[key]?.metadata?.name}
+                            className={`rewardImage blue`}
+                          />
+                          <h3>
+                            {nftMetadata[key]?.metadata?.name}{" "}
+                            {nftByUser[nftMetadata[key]?.metadata?.symbol] > 1
+                              ? `(x${
+                                  nftByUser[nftMetadata[key]?.metadata?.symbol]
+                                })`
+                              : ""}
+                          </h3>
+                        </div>
+                      )
+                  )}
                 </div>
                 <button
                   className="btnResult success"

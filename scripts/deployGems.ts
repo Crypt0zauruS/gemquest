@@ -70,7 +70,7 @@ async function main() {
     );
 
 
-    // await CreateToken(metadata_gem_1);
+    await CreateToken(metadata_gem_1);
     await CreateToken(metadata_gem_5);
     await CreateToken(metadata_gem_10);
     await CreateToken(metadata_gem_20);
