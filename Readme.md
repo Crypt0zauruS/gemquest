@@ -34,6 +34,8 @@ Voici un résumé du diagramme de séquence disponnible dans la partie
 
 ## Aperçu de l'application
 
+https://www.loom.com/share/0315bcb42a6c4fa2a6a59e41482692c5
+
 <img src="https://github.com/user-attachments/assets/3f46e9df-6903-4a2d-9d15-f51ae0e7efa5" width="18%">
 <img src="https://github.com/user-attachments/assets/99817a76-ed14-408b-a8ec-65d8c363b478" width="18%">
 <img src="https://github.com/user-attachments/assets/1d024439-e164-4007-8d25-cfc570d61b71" width="18%">
